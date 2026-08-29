@@ -417,6 +417,24 @@
             background: var(--accent2);
             box-shadow: 0 0 16px var(--accent-glow);
         }
+        .copy-link-btn {
+            background: var(--card);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-family: var(--mono);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .copy-link-btn:hover {
+            background: var(--badge-bg);
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
         footer { border-top: 1px solid var(--border); padding: 28px 24px; text-align: center; color: var(--text-dim); font-size: 0.85rem; margin-top: 40px; }
         .back-top {
             position: fixed; bottom: 24px; right: 24px; background: var(--card); border: 1px solid var(--accent);
@@ -761,7 +779,12 @@
                                     <div class="project-title"><span>${proj.name}</span>${proj.playable ? '<button class="btn-play" id="startGameBtn">飞机大战开始体验</button>' : '<span style="color:var(--accent);">↗</span>'}</div>
                                     <div class="tech-tags">${proj.tech.map(t => `<span class="tech-tag">${t}</span>`).join('')}</div>
                                     <div style="font-size:0.9rem;color:var(--text-dim);">${proj.result}</div>
-                                    ${proj.playable ? `<a class="game-link" href="${proj.gameUrl}" target="_blank" rel="noopener noreferrer">🔗 游戏链接：${proj.gameUrl}</a>` : ''}
+                                    ${proj.playable ? `
+                                        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
+                                            <a class="game-link" href="${proj.gameUrl}" target="_blank" rel="noopener noreferrer">🔗 游戏链接</a>
+                                            <button class="copy-link-btn" id="copyGameLink" data-url="${proj.gameUrl}">📋 复制链接</button>
+                                        </div>
+                                    ` : ''}
                                     ${proj.playable ? `<div class="game-container" id="gameContainer"><iframe src="${proj.gameUrl}" title="飞机大战游戏" allow="autoplay; fullscreen" allowfullscreen></iframe></div>` : ''}
                                 </div>
                             </div>`).join('')}
@@ -852,6 +875,11 @@
                 document.getElementById('copyEmail').addEventListener('click', () => copyText(resume.contact.email, '邮箱'));
                 document.getElementById('copyWechat').addEventListener('click', () => copyText(resume.contact.wechat, '微信'));
                 document.getElementById('copyQQ').addEventListener('click', () => copyText(resume.contact.qq, 'QQ'));
+
+                document.getElementById('copyGameLink')?.addEventListener('click', (e) => {
+                    const url = e.currentTarget.dataset.url;
+                    copyText(url, '游戏链接');
+                });
 
                 const backTop = document.getElementById('backTop');
                 window.addEventListener('scroll', () => {
