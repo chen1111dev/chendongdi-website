@@ -117,6 +117,28 @@
         .btn-primary { background: var(--accent); color: #0a0e14; border-color: var(--accent); }
         .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); box-shadow: 0 0 20px var(--accent-glow); }
         .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-play {
+            background: var(--accent);
+            color: #0a0e14;
+            border-color: var(--accent);
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--mono);
+            text-decoration: none;
+            margin-left: 8px;
+        }
+        .btn-play:hover {
+            background: var(--accent2);
+            border-color: var(--accent2);
+            box-shadow: 0 0 16px var(--accent-glow);
+        }
         .card {
             background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
             padding: 24px; box-shadow: var(--shadow); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
@@ -195,6 +217,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center;
             display: block;
             border-radius: 0;
         }
@@ -276,6 +299,105 @@
         .culture-photo-item.wide .slider-track img {
             width: 320px;
         }
+        .hobby-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 12px;
+        }
+        .hobby-item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .hobby-item:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .hobby-item .hobby-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 8px;
+            font-family: var(--mono);
+        }
+        .hobby-item p {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+        .hobby-photo-placeholder {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: var(--badge-bg);
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dim);
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        .hobby-photo-placeholder:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--card-hover);
+        }
+        .hobby-photo-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 0;
+        }
+        .photo-slideshow {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            background: var(--badge-bg);
+            position: relative;
+        }
+        .photo-slideshow img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .photo-slideshow img.active {
+            opacity: 1;
+        }
+        .game-container {
+            margin-top: 12px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--badge-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        .game-container iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
         footer { border-top: 1px solid var(--border); padding: 28px 24px; text-align: center; color: var(--text-dim); font-size: 0.85rem; margin-top: 40px; }
         .back-top {
             position: fixed; bottom: 24px; right: 24px; background: var(--card); border: 1px solid var(--accent);
@@ -285,10 +407,12 @@
         }
         .back-top.visible { opacity: 1; transform: translateY(0); }
         @media (max-width: 900px) {
+            .hobby-grid { grid-template-columns: 1fr; }
             .culture-photo-grid { grid-template-columns: 1fr; }
             .culture-photo-item.wide { grid-column: span 1; }
             .photo-placeholder, .slider-container { height: auto; aspect-ratio: 16 / 9; }
             .slider-track img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+            .game-container iframe { height: 400px; }
         }
         @media (max-width: 680px) {
             .nav-inner { padding: 10px 16px; gap: 10px; }
@@ -299,12 +423,13 @@
             .avatar-placeholder { width: 80px; height: 80px; font-size: 1.8rem; }
             .photo-placeholder, .slider-container { aspect-ratio: 4 / 3; }
             .slider-track img { aspect-ratio: 4 / 3; }
+            .game-container iframe { height: 350px; }
         }
         @media print {
             body { background: #fff; color: #111; padding-top: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .navbar, .back-top, .contact-btns, .icon-btn, .btn-outline, .nav-actions { display: none !important; }
             .container { max-width: 100%; padding: 0; }
-            .card, .highlight-item, .project-card, .certificate-card, .culture-photo-item { box-shadow: none; border: 1px solid #ccc; }
+            .card, .highlight-item, .project-card, .certificate-card, .culture-photo-item, .hobby-item { box-shadow: none; border: 1px solid #ccc; }
             body::before { display: none; }
             .hero-title h1 { color: #000; background: none; -webkit-background-clip: initial; background-clip: initial; }
             .badge { background: #eee; color: #000; border-color: #aaa; }
@@ -316,6 +441,9 @@
             .slider-container { display: none; }
             .culture-photo-grid { grid-template-columns: 1fr 1fr; }
             .culture-photo-item.wide { grid-column: span 2; }
+            .hobby-grid { grid-template-columns: 1fr 1fr 1fr; }
+            .photo-slideshow { border: 1px solid #aaa; background: #f0f0f0; }
+            .game-container iframe { display: none; }
         }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
@@ -329,6 +457,7 @@
             <div class="brand">cdd@security:~$</div>
             <div class="nav-links" id="navLinks">
                 <a href="#hero" data-nav>首页</a>
+                <a href="#hobby" data-nav>爱好</a>
                 <a href="#culture" data-nav>家乡</a>
                 <a href="#highlights" data-nav>亮点</a>
                 <a href="#experience" data-nav>经历</a>
@@ -368,10 +497,18 @@
                     badges: ['智能客服AI训练师', 'OWASP Top 10 基础', 'Python入门', 'PPT展示', '网络安全意识', 'NLP兴趣'],
                     avatar: 'logo.jpg'
                 },
+                hobbies: {
+                    title: '个人爱好',
+                    items: [
+                        { name: '看小说', desc: '喜欢阅读各类小说。', photo: '看小说.jpg' },
+                        { name: '拍照', desc: '喜欢用镜头记录生活，尤其擅长风景。', photos: ['7.jpg', '8.jpg', '9.jpg', '10.jpg', '11.jpg', '12.jpg'] },
+                        { name: '看动漫', desc: '热爱动漫文化，喜欢热血与治愈系作品。', photo: '看动漫.jpg' }
+                    ]
+                },
                 highlights: [
                     { number: '1', label: '目标明确', desc: '信息安全技术应用专业，已制定大学学习规划' },
+                    { number: '🚀', label: '飞机大战小游戏开发', desc: 'Python / Trae Code | 2026年7月', game: true },
                     { number: '2', label: '达摩院AI训练师认证（初、高级）', desc: '2026年7-8月，高中毕业后独立完成双证自考' },
-                    { number: '60+', label: '语料标注专注时长（小时）', desc: '智能客服语料标注实践，保持高质量输出' },
                     { number: '3', label: '自主学习方向', desc: 'Python基础 · 计算机网络入门 · OWASP Top 10' }
                 ],
                 experience: [
@@ -398,6 +535,13 @@
                     }
                 ],
                 projects: [
+                    {
+                        name: '飞机大战小游戏开发',
+                        tech: ['Python', 'Trae Code', 'Pygame'],
+                        result: '利用自学Python基础，使用Trae Code独立完成飞机大战小游戏开发，包含玩家控制、敌机生成、碰撞检测、计分系统等核心功能模块。通过AI辅助生成基础框架并手动优化代码逻辑，解决了游戏循环优化、碰撞检测精度、键盘事件响应等关键技术问题。在开发过程中加深了对Python面向对象编程的理解，并养成了阅读技术文档和调试代码的习惯。源代码已保存至个人本地仓库，计划入学后上传至GitHub作为个人编程起步作品。',
+                        playable: true,
+                        gameUrl: 'https://grand-kashata-51496c.netlify.app'
+                    },
                     { name: '待补充：CTF竞赛 / 安全实践', tech: ['信息安全', 'CTF', '渗透测试'], result: '大学期间计划参与的项目', link: '#' },
                     { name: '待补充：智能客服/AI实训项目', tech: ['NLP', '大模型', '语料标注'], result: '计划结合AI训练师认证开展课程设计', link: '#' },
                     { name: '待补充：校园网络运维/安全防护', tech: ['网络基础', 'Linux', '安全加固'], result: '计划参与校园网络维护实践', link: '#' }
@@ -483,6 +627,29 @@
                     </div>
                 </section>`;
 
+                // 个人爱好
+                html += `
+                <section id="hobby" style="margin-bottom: 48px;">
+                    <div class="section-title">🎯 个人爱好</div>
+                    <div class="card">
+                        <div class="hobby-grid">
+                            ${resume.hobbies.items.map(item => `
+                                <div class="hobby-item">
+                                    <div class="hobby-name">${item.name}</div>
+                                    <p>${item.desc}</p>
+                                    ${item.photos ? `
+                                        <div class="photo-slideshow" id="photoSlideshow">
+                                            ${item.photos.map((p, idx) => `<img src="${p}" alt="${item.name}照片${idx+1}" class="${idx===0?'active':''}" onerror="this.style.display='none'">`).join('')}
+                                        </div>
+                                    ` : `
+                                        <div class="hobby-photo-placeholder"><img src="${item.photo}" alt="${item.name}照片" onerror="this.parentElement.innerHTML='照片位置 · 待添加'"></div>
+                                    `}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </section>`;
+
                 // 家乡与民俗文化
                 html += `
                 <section id="culture" style="margin-bottom: 48px;">
@@ -527,7 +694,7 @@
                         ${resume.highlights.map(h => `
                             <div class="highlight-item">
                                 <div class="highlight-number">${h.number}</div>
-                                <div><strong>${h.label}</strong></div>
+                                <div><strong>${h.label}</strong> ${h.game ? '<button class="btn-play" id="playGameBtn">玩一玩</button>' : ''}</div>
                                 <div style="color:var(--text-dim);font-size:0.9rem;">${h.desc}</div>
                             </div>`).join('')}
                     </div>
@@ -567,14 +734,15 @@
                     <div class="tabs-container" id="projTabs">
                         <div class="tab-list" role="tablist" aria-label="项目标签">
                             ${resume.projects.map((p, i) => `
-                                <button class="tab-btn" role="tab" aria-selected="${i===0}" aria-controls="proj-panel-${i}" id="proj-tab-${i}" tabindex="${i===0?0:-1}">项目${i+1}</button>`).join('')}
+                                <button class="tab-btn" role="tab" aria-selected="${i===0}" aria-controls="proj-panel-${i}" id="proj-tab-${i}" tabindex="${i===0?0:-1}">${p.name}</button>`).join('')}
                         </div>
                         ${resume.projects.map((proj, i) => `
                             <div class="tab-panel" role="tabpanel" id="proj-panel-${i}" aria-labelledby="proj-tab-${i}" ${i!==0?'hidden':''}>
                                 <div class="project-card">
-                                    <div class="project-title"><span>${proj.name}</span><span style="color:var(--accent);">↗</span></div>
+                                    <div class="project-title"><span>${proj.name}</span>${proj.playable ? '<button class="btn-play" id="startGameBtn">飞机大战开始体验</button>' : '<span style="color:var(--accent);">↗</span>'}</div>
                                     <div class="tech-tags">${proj.tech.map(t => `<span class="tech-tag">${t}</span>`).join('')}</div>
                                     <div style="font-size:0.9rem;color:var(--text-dim);">${proj.result}</div>
+                                    ${proj.playable ? `<div class="game-container" id="gameContainer"><iframe src="${proj.gameUrl}" title="飞机大战游戏"></iframe></div>` : ''}
                                 </div>
                             </div>`).join('')}
                     </div>
@@ -631,6 +799,19 @@
 
                 main.innerHTML = html;
                 initInteractions();
+                initSlideshow();
+            }
+
+            function initSlideshow() {
+                const slideshow = document.getElementById('photoSlideshow');
+                if (!slideshow) return;
+                const images = slideshow.querySelectorAll('img');
+                let currentIndex = 0;
+                setInterval(() => {
+                    images[currentIndex].classList.remove('active');
+                    currentIndex = (currentIndex + 1) % images.length;
+                    images[currentIndex].classList.add('active');
+                }, 3000);
             }
 
             function initInteractions() {
@@ -661,6 +842,20 @@
 
                 setupTabs('expTabs');
                 setupTabs('projTabs');
+
+                document.getElementById('playGameBtn')?.addEventListener('click', () => {
+                    document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' });
+                    setTimeout(() => {
+                        const tabs = document.querySelectorAll('#projTabs .tab-btn');
+                        if (tabs.length > 0) {
+                            tabs[0].click();
+                        }
+                    }, 300);
+                });
+
+                document.getElementById('startGameBtn')?.addEventListener('click', () => {
+                    document.getElementById('gameContainer')?.scrollIntoView({ behavior: 'smooth' });
+                });
 
                 document.querySelectorAll('[data-nav]').forEach(a => {
                     a.addEventListener('click', (e) => {
