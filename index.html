@@ -115,48 +115,6 @@
             70% { box-shadow: 0 0 0 10px rgba(0, 229, 160, 0); }
             100% { box-shadow: 0 0 0 0 rgba(0, 229, 160, 0); }
         }
-        .unmute-hint {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-family: var(--font);
-            cursor: pointer;
-        }
-        .unmute-hint-inner {
-            text-align: center;
-            background: var(--card);
-            padding: 32px 24px;
-            border-radius: 20px;
-            border: 1px solid var(--accent);
-            box-shadow: var(--shadow);
-            max-width: 90%;
-        }
-        .unmute-hint p {
-            font-size: 1.4rem;
-            margin-bottom: 20px;
-            color: var(--text);
-            font-weight: 600;
-        }
-        .unmute-hint button {
-            background: var(--accent);
-            color: #0a0e14;
-            border: none;
-            padding: 14px 32px;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 1.1rem;
-            transition: all 0.2s;
-        }
-        .unmute-hint button:hover {
-            background: var(--accent2);
-            transform: scale(1.05);
-        }
         .hero { display: flex; flex-direction: column; gap: 28px; padding: 24px 0 40px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
         .hero-top { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
         .avatar-placeholder {
@@ -538,7 +496,7 @@
         }
         @media print {
             body { background: #fff; color: #111; padding-top: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .navbar, .back-top, .contact-btns, .icon-btn, .btn-outline, .nav-actions, .bgm-btn, .unmute-hint { display: none !important; }
+            .navbar, .back-top, .contact-btns, .icon-btn, .btn-outline, .nav-actions, .bgm-btn { display: none !important; }
             .container { max-width: 100%; padding: 0; }
             .card, .highlight-item, .project-card, .certificate-card, .culture-photo-item, .hobby-item { box-shadow: none; border: 1px solid #ccc; }
             body::before { display: none; }
@@ -1030,10 +988,8 @@
             const bgm = document.getElementById('bgm');
             const bgmToggle = document.getElementById('bgmToggle');
             let isPlaying = false;
-            let hasUnmuted = false;
 
-            // 静音自动播放，激活播放器
-            bgm.muted = true;
+            // 尝试自动播放
             bgm.volume = 0.5;
             bgm.play().then(() => {
                 isPlaying = true;
@@ -1045,39 +1001,20 @@
                 bgmToggle.classList.remove('playing');
             });
 
-            // 显示一键开启声音提示
-            function showUnmuteHint() {
-                if (hasUnmuted) return;
-                const hint = document.createElement('div');
-                hint.className = 'unmute-hint';
-                hint.innerHTML = `
-                    <div class="unmute-hint-inner">
-                        <p>🎵 点击开启声音</p>
-                        <button>开启音乐</button>
-                    </div>
-                `;
-                document.body.appendChild(hint);
-
-                function unmute() {
-                    bgm.muted = false;
-                    bgm.volume = 0.5;
+            // 如果自动播放被阻止，等待首次点击页面任意位置再播放
+            document.addEventListener('click', function tryPlay() {
+                if (!isPlaying) {
                     bgm.play().then(() => {
                         isPlaying = true;
                         bgmToggle.textContent = '🔊';
                         bgmToggle.classList.add('playing');
-                        hasUnmuted = true;
+                    }).catch(() => {
+                        bgmToggle.textContent = '🔇';
+                        bgmToggle.classList.remove('playing');
                     });
-                    hint.remove();
-                    document.removeEventListener('click', unmute);
-                    document.removeEventListener('touchstart', unmute);
                 }
-
-                hint.addEventListener('click', unmute);
-                document.addEventListener('click', unmute);
-                document.addEventListener('touchstart', unmute);
-            }
-
-            showUnmuteHint();
+                document.removeEventListener('click', tryPlay);
+            });
 
             // 喇叭按钮控制
             bgmToggle.addEventListener('click', (e) => {
