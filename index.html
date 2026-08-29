@@ -392,11 +392,29 @@
             align-items: center;
             justify-content: center;
             width: 100%;
+            position: relative;
         }
         .game-container iframe {
             width: 100%;
             height: 500px;
             border: none;
+            display: block;
+        }
+        .game-link {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 8px 16px;
+            background: var(--accent);
+            color: #0a0e14;
+            border-radius: 8px;
+            font-weight: 700;
+            font-family: var(--mono);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .game-link:hover {
+            background: var(--accent2);
+            box-shadow: 0 0 16px var(--accent-glow);
         }
         footer { border-top: 1px solid var(--border); padding: 28px 24px; text-align: center; color: var(--text-dim); font-size: 0.85rem; margin-top: 40px; }
         .back-top {
@@ -423,7 +441,7 @@
             .avatar-placeholder { width: 80px; height: 80px; font-size: 1.8rem; }
             .photo-placeholder, .slider-container { aspect-ratio: 4 / 3; }
             .slider-track img { aspect-ratio: 4 / 3; }
-            .game-container iframe { height: 350px; }
+            .game-container iframe { height: 320px; }
         }
         @media print {
             body { background: #fff; color: #111; padding-top: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -742,7 +760,8 @@
                                     <div class="project-title"><span>${proj.name}</span>${proj.playable ? '<button class="btn-play" id="startGameBtn">飞机大战开始体验</button>' : '<span style="color:var(--accent);">↗</span>'}</div>
                                     <div class="tech-tags">${proj.tech.map(t => `<span class="tech-tag">${t}</span>`).join('')}</div>
                                     <div style="font-size:0.9rem;color:var(--text-dim);">${proj.result}</div>
-                                    ${proj.playable ? `<div class="game-container" id="gameContainer"><iframe src="${proj.gameUrl}" title="飞机大战游戏"></iframe></div>` : ''}
+                                    ${proj.playable ? `<a class="game-link" href="${proj.gameUrl}" target="_blank" rel="noopener noreferrer">🔗 游戏链接：${proj.gameUrl}</a>` : ''}
+                                    ${proj.playable ? `<div class="game-container" id="gameContainer"><iframe src="${proj.gameUrl}" title="飞机大战游戏" allow="autoplay; fullscreen" allowfullscreen></iframe></div>` : ''}
                                 </div>
                             </div>`).join('')}
                     </div>
@@ -811,7 +830,7 @@
                     images[currentIndex].classList.remove('active');
                     currentIndex = (currentIndex + 1) % images.length;
                     images[currentIndex].classList.add('active');
-                }, 3000);
+                }, 2000);
             }
 
             function initInteractions() {
