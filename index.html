@@ -273,16 +273,17 @@
             font-size: 0.6rem;
             font-weight: 600;
             color: var(--text-dim);
-            cursor: grab;
+            cursor: pointer;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), inset 0 -2px 6px rgba(0, 0, 0, 0.3);
             font-family: var(--font-mono);
             letter-spacing: 0.5px;
             z-index: 3;
             user-select: none;
-            touch-action: none;
-            transition: border-color 0.3s, color 0.3s, box-shadow 0.3s, background 0.3s;
+            touch-action: manipulation;
+            transition: border-color 0.3s, color 0.3s, box-shadow 0.3s, background 0.3s, opacity 0.3s ease, transform 0.3s ease;
             transform: translate(-50%, -50%) translateZ(5px);
             will-change: left, top;
+            -webkit-tap-highlight-color: transparent;
         }
         .ring-item .label {
             text-align: center;
@@ -296,13 +297,14 @@
             background: var(--bg-card-hover);
             z-index: 4;
         }
-        .ring-item.dragging {
-            cursor: grabbing;
-            z-index: 5;
-            transform: translate(-50%, -50%) scale(1.12) translateZ(20px) !important;
-            border-color: var(--accent);
-            box-shadow: 0 0 30px var(--accent-glow);
-            transition: none;
+        .ring-item:active {
+            transform: translate(-50%, -50%) scale(0.92) translateZ(5px);
+        }
+        .ring-item.collapsed {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translate(-50%, -50%) scale(0.3) translateZ(5px);
         }
 
         #ring-svg {
@@ -704,17 +706,17 @@
         }
         .showcase-container .showcase-btn {
             position: absolute;
-            bottom: 14px;
+            bottom: 12px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--accent);
             color: #0b0c10;
             border: none;
-            padding: 5px 18px;
+            padding: 6px 20px;
             border-radius: 30px;
             font-family: var(--font-mono);
             font-weight: 700;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             cursor: pointer;
             z-index: 10;
             transition: all 0.3s;
@@ -763,8 +765,8 @@
             transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
         }
         .showcase-images img.show {
-            width: 500px;
-            height: 375px;
+            width: 560px;
+            height: 420px;
             opacity: 1;
             transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
         }
@@ -793,7 +795,7 @@
             .hobby-grid { grid-template-columns: 1fr; }
             .showcase-container { aspect-ratio: 4 / 3; }
             .showcase-images img.flying { width: 100px; height: 75px; }
-            .showcase-images img.show { width: 300px; height: 225px; }
+            .showcase-images img.show { width: 320px; height: 240px; }
         }
         @media (max-width: 480px) {
             .nav-links a { font-size: 0.7rem; }
@@ -803,7 +805,7 @@
             .ring-center { width: 56px; height: 56px; font-size: 0.8rem; }
             .ring-item { width: 32px; height: 32px; font-size: 0.45rem; }
             .showcase-images img.flying { width: 70px; height: 52px; }
-            .showcase-images img.show { width: 220px; height: 165px; }
+            .showcase-images img.show { width: 240px; height: 180px; }
         }
     </style>
 </head>
@@ -998,6 +1000,7 @@
 
             let bootDismissed = false;
             let ringActive = false;
+            let ringCollapsed = false;
             let animationId = null;
             let orbitAngle = 0;
             const ORBIT_SPEED = 0.006;
@@ -1010,9 +1013,6 @@
             ringItems.forEach((_, i) => {
                 dotOffsets.push((i / DOT_COUNT) * 2 * Math.PI);
             });
-
-            let dragData = null;
-            let bounceData = null;
 
             // ============================================================
             //  1. 开机终端
@@ -1077,40 +1077,6 @@
                         animationId = requestAnimationFrame(loop);
                         return;
                     }
-                    if (dragData) {
-                        updateLines();
-                        animationId = requestAnimationFrame(loop);
-                        return;
-                    }
-                    if (bounceData) {
-                        const b = bounceData;
-                        const dx = b.targetX - b.startX;
-                        const dy = b.targetY - b.startY;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < 0.5) {
-                            b.dot.style.left = b.targetX + 'px';
-                            b.dot.style.top = b.targetY + 'px';
-                            b.dot.style.transform = 'translate(-50%, -50%) translateZ(5px)';
-                            bounceData = null;
-                            updateLines();
-                            animationId = requestAnimationFrame(loop);
-                            return;
-                        }
-                        const stiffness = 0.08;
-                        const damping = 0.92;
-                        b.velocityX += (b.targetX - b.startX) * stiffness;
-                        b.velocityY += (b.targetY - b.startY) * stiffness;
-                        b.velocityX *= damping;
-                        b.velocityY *= damping;
-                        b.startX += b.velocityX;
-                        b.startY += b.velocityY;
-                        b.dot.style.left = b.startX + 'px';
-                        b.dot.style.top = b.startY + 'px';
-                        b.dot.style.transform = 'translate(-50%, -50%) translateZ(5px)';
-                        updateLines();
-                        animationId = requestAnimationFrame(loop);
-                        return;
-                    }
                     orbitAngle += ORBIT_SPEED;
                     updateDotPositions(orbitAngle);
                     updateLines();
@@ -1120,157 +1086,7 @@
             }
 
             // ============================================================
-            //  4. 拖拽系统
-            // ============================================================
-            function setupDrag(dot, index) {
-                let isDragging = false;
-
-                function onPointerDown(e) {
-                    e.preventDefault();
-                    const pos = getPointerPos(e);
-                    const rect = dot.getBoundingClientRect();
-                    const containerRect = ringContainer.getBoundingClientRect();
-                    const dotCenterX = rect.left + rect.width / 2 - containerRect.left;
-                    const dotCenterY = rect.top + rect.height / 2 - containerRect.top;
-
-                    isDragging = true;
-                    dot.classList.add('dragging');
-                    dragData = {
-                        dot: dot,
-                        index: index,
-                        startX: dotCenterX,
-                        startY: dotCenterY,
-                        offsetX: pos.x - rect.left - rect.width / 2,
-                        offsetY: pos.y - rect.top - rect.height / 2,
-                        containerRect: containerRect
-                    };
-                    bounceData = null;
-                    dot.style.transition = 'none';
-                }
-
-                function onPointerMove(e) {
-                    if (!isDragging || !dragData) return;
-                    e.preventDefault();
-                    const pos = getPointerPos(e);
-                    const containerRect = dragData.containerRect;
-                    const newX = pos.x - containerRect.left - dragData.offsetX;
-                    const newY = pos.y - containerRect.top - dragData.offsetY;
-                    const clampedX = Math.max(10, Math.min(newX, containerRect.width - 10));
-                    const clampedY = Math.max(10, Math.min(newY, containerRect.height - 10));
-                    dragData.dot.style.left = clampedX + 'px';
-                    dragData.dot.style.top = clampedY + 'px';
-                    dragData.dot.style.transform = 'translate(-50%, -50%) translateZ(5px)';
-                    updateLines();
-                }
-
-                function onPointerUp(e) {
-                    if (!isDragging || !dragData) return;
-                    isDragging = false;
-                    dot.classList.remove('dragging');
-                    const currentAngle = orbitAngle + dotOffsets[index];
-                    const targetX = CENTER_X + ORBIT_RADIUS * Math.cos(currentAngle);
-                    const targetY = CENTER_Y + ORBIT_RADIUS * Math.sin(currentAngle);
-
-                    const rect = dot.getBoundingClientRect();
-                    const containerRect = ringContainer.getBoundingClientRect();
-                    const curX = rect.left + rect.width / 2 - containerRect.left;
-                    const curY = rect.top + rect.height / 2 - containerRect.top;
-
-                    const dx = targetX - curX;
-                    const dy = targetY - curY;
-                    if (Math.sqrt(dx * dx + dy * dy) < 2) {
-                        dot.style.left = targetX + 'px';
-                        dot.style.top = targetY + 'px';
-                        dot.style.transform = 'translate(-50%, -50%) translateZ(5px)';
-                        updateLines();
-                    } else {
-                        bounceData = {
-                            dot: dot,
-                            startX: curX,
-                            startY: curY,
-                            targetX: targetX,
-                            targetY: targetY,
-                            velocityX: 0,
-                            velocityY: 0
-                        };
-                    }
-                    dragData = null;
-                    updateLines();
-                }
-
-                dot.addEventListener('mousedown', onPointerDown);
-                document.addEventListener('mousemove', onPointerMove);
-                document.addEventListener('mouseup', onPointerUp);
-
-                dot.addEventListener('touchstart', function(e) {
-                    const touch = e.touches[0];
-                    const me = new MouseEvent('mousedown', {
-                        clientX: touch.clientX,
-                        clientY: touch.clientY,
-                    });
-                    dot.dispatchEvent(me);
-                    e.preventDefault();
-                }, { passive: false });
-
-                document.addEventListener('touchmove', function(e) {
-                    if (!dragData) return;
-                    const touch = e.touches[0];
-                    const me = new MouseEvent('mousemove', {
-                        clientX: touch.clientX,
-                        clientY: touch.clientY,
-                    });
-                    document.dispatchEvent(me);
-                    e.preventDefault();
-                }, { passive: false });
-
-                document.addEventListener('touchend', function(e) {
-                    if (!dragData) return;
-                    const me = new MouseEvent('mouseup', {});
-                    document.dispatchEvent(me);
-                }, { passive: false });
-
-                dot.addEventListener('click', function(e) {
-                    if (dragData) return;
-                    const target = this.dataset.target;
-                    const section = document.getElementById(target);
-                    if (section) {
-                        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        navLinks.forEach(a => {
-                            a.classList.toggle('active', a.dataset.nav === target);
-                        });
-                    }
-                    const idx = Array.from(ringItems).indexOf(this);
-                    if (idx < svgLines.length) {
-                        svgLines[idx].classList.add('active');
-                        setTimeout(() => {
-                            svgLines[idx].classList.remove('active');
-                        }, 800);
-                    }
-                });
-
-                dot.addEventListener('mouseenter', function() {
-                    const idx = Array.from(ringItems).indexOf(this);
-                    if (idx < svgLines.length) {
-                        svgLines[idx].classList.add('active');
-                    }
-                });
-                dot.addEventListener('mouseleave', function() {
-                    const idx = Array.from(ringItems).indexOf(this);
-                    if (idx < svgLines.length) {
-                        svgLines[idx].classList.remove('active');
-                    }
-                });
-            }
-
-            function getPointerPos(e) {
-                if (e.touches) {
-                    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-                }
-                return { x: e.clientX, y: e.clientY };
-            }
-
-            // ============================================================
-            //  5. 连线更新
+            //  4. 连线更新
             // ============================================================
             function updateLines() {
                 const dots = document.querySelectorAll('.ring-item');
@@ -1297,7 +1113,7 @@
             });
 
             // ============================================================
-            //  6. 导航栏点击跳转
+            //  5. 导航栏点击跳转
             // ============================================================
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
@@ -1313,19 +1129,54 @@
             });
 
             // ============================================================
-            //  7. 交互：点击中心切换环
+            //  6. 交互：点击中心切换环的展开/收起
             // ============================================================
-            ringCenter.addEventListener('click', function() {
-                if (ringActive) {
-                    navRingOverlay.classList.remove('active');
-                    navRingOverlay.classList.add('hidden');
-                    ringActive = false;
-                } else {
-                    navRingOverlay.classList.remove('hidden');
-                    navRingOverlay.classList.add('active');
-                    ringActive = true;
-                    updateLines();
-                }
+            ringCenter.addEventListener('click', function(e) {
+                e.stopPropagation();
+                ringCollapsed = !ringCollapsed;
+                ringItems.forEach(item => {
+                    if (ringCollapsed) {
+                        item.classList.add('collapsed');
+                    } else {
+                        item.classList.remove('collapsed');
+                    }
+                });
+                this.textContent = ringCollapsed ? '展开' : '了解';
+            });
+
+            // 小圆点击 - 跳转板块
+            ringItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const target = this.dataset.target;
+                    const section = document.getElementById(target);
+                    if (section) {
+                        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        navLinks.forEach(a => {
+                            a.classList.toggle('active', a.dataset.nav === target);
+                        });
+                    }
+                    const idx = Array.from(ringItems).indexOf(this);
+                    if (idx < svgLines.length) {
+                        svgLines[idx].classList.add('active');
+                        setTimeout(() => {
+                            svgLines[idx].classList.remove('active');
+                        }, 800);
+                    }
+                });
+                // hover 高亮
+                item.addEventListener('mouseenter', function() {
+                    const idx = Array.from(ringItems).indexOf(this);
+                    if (idx < svgLines.length) {
+                        svgLines[idx].classList.add('active');
+                    }
+                });
+                item.addEventListener('mouseleave', function() {
+                    const idx = Array.from(ringItems).indexOf(this);
+                    if (idx < svgLines.length) {
+                        svgLines[idx].classList.remove('active');
+                    }
+                });
             });
 
             brandHome.addEventListener('click', function() {
@@ -1339,14 +1190,7 @@
             });
 
             // ============================================================
-            //  8. 初始化拖拽
-            // ============================================================
-            ringItems.forEach((dot, i) => {
-                setupDrag(dot, i);
-            });
-
-            // ============================================================
-            //  9. 纸飞机展示 - 照片最大化，几乎占满按钮上方空间
+            //  7. 纸飞机展示 + "再看一次"按钮
             // ============================================================
             function initShowcase() {
                 const container = document.getElementById('showcaseContainer');
@@ -1360,6 +1204,7 @@
                 let currentIndex = 0;
                 let imgElements = [];
                 let autoTimer = null;
+                let allShown = false;
 
                 photoList.forEach((src, i) => {
                     const img = document.createElement('img');
@@ -1398,11 +1243,34 @@
                     return { cx1, cy1, cx2, cy2 };
                 }
 
+                function resetAll() {
+                    if (autoTimer) {
+                        clearTimeout(autoTimer);
+                        autoTimer = null;
+                    }
+                    currentIndex = 0;
+                    isPlaying = false;
+                    allShown = false;
+                    imgElements.forEach(img => {
+                        img.style.width = '0';
+                        img.style.height = '0';
+                        img.style.opacity = '0';
+                        img.style.left = '50%';
+                        img.style.top = '50%';
+                        img.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+                        img.style.transition = 'none';
+                        img.classList.remove('show', 'flying');
+                    });
+                    btn.textContent = '✈️ 来吧，展示！';
+                    btn.disabled = false;
+                }
+
                 function flyNext() {
                     if (isPlaying) return;
                     if (currentIndex >= photoList.length) {
-                        btn.textContent = '✨ 全部展示';
-                        btn.disabled = true;
+                        allShown = true;
+                        btn.textContent = '🔄 再看一次';
+                        btn.disabled = false;
                         return;
                     }
 
@@ -1418,8 +1286,8 @@
 
                     const img = imgElements[currentIndex];
                     const start = getRandomStartPosition(w, h);
-                    const endX = centerX + (Math.random() - 0.5) * 10;
-                    const endY = centerY + (Math.random() - 0.5) * 8;
+                    const endX = centerX + (Math.random() - 0.5) * 8;
+                    const endY = centerY + (Math.random() - 0.5) * 6;
 
                     img.style.left = start.x + 'px';
                     img.style.top = start.y + 'px';
@@ -1436,9 +1304,8 @@
                     const startY = start.y;
                     const path = getBezierPath(startX, startY, endX, endY);
 
-                    // 最终展示尺寸 - 几乎占满容器 (留出按钮空间)
-                    const size = Math.min(w, h) * 0.82;
-                    const flySize = Math.min(w, h) * 0.20;
+                    const size = Math.min(w, h) * 0.88;
+                    const flySize = Math.min(w, h) * 0.18;
 
                     function animateFly(time) {
                         const elapsed = time - startTime;
@@ -1490,39 +1357,19 @@
                                     flyNext();
                                 }, 900);
                             } else {
-                                btn.textContent = '✨ 全部展示';
-                                btn.disabled = true;
+                                allShown = true;
+                                btn.textContent = '🔄 再看一次';
+                                btn.disabled = false;
                             }
                         }
                     }
                     requestAnimationFrame(animateFly);
                 }
 
-                function resetAll() {
-                    if (autoTimer) {
-                        clearTimeout(autoTimer);
-                        autoTimer = null;
-                    }
-                    currentIndex = 0;
-                    isPlaying = false;
-                    imgElements.forEach(img => {
-                        img.style.width = '0';
-                        img.style.height = '0';
-                        img.style.opacity = '0';
-                        img.style.left = '50%';
-                        img.style.top = '50%';
-                        img.style.transform = 'translate(-50%, -50%) rotate(0deg)';
-                        img.style.transition = 'none';
-                        img.classList.remove('show', 'flying');
-                    });
-                    btn.textContent = '✈️ 来吧，展示！';
-                    btn.disabled = false;
-                }
-
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     if (isPlaying) return;
-                    if (currentIndex >= photoList.length) {
+                    if (allShown || currentIndex >= photoList.length) {
                         resetAll();
                         setTimeout(() => {
                             flyNext();
@@ -1534,7 +1381,7 @@
             }
 
             // ============================================================
-            //  10. 渲染主内容
+            //  8. 渲染主内容
             // ============================================================
             function renderMain() {
                 let html = '';
