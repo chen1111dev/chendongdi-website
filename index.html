@@ -1,564 +1,894 @@
 ```html
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>陈东弟 · 信息安全技术应用</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>陈东弟 · 安全终端</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
-            --bg: #0a0e14;
-            --card: #131c26;
-            --card-hover: #1a2634;
+            --bg: #0b0c10;
+            --bg-card: #111827;
+            --bg-card-hover: #1a2332;
             --border: #243447;
             --text: #d6e2ee;
             --text-dim: #7f95ad;
-            --accent: #00e5a0;
-            --accent2: #00b8ff;
-            --accent-glow: rgba(0, 229, 160, 0.15);
+            --accent: #66fcf1;
+            --accent2: #45a29e;
+            --accent-glow: rgba(102, 252, 241, 0.12);
             --badge-bg: #1b2a38;
-            --timeline-line: #2a3f55;
-            --radius: 14px;
-            --shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
-            --transition: 0.2s ease;
-            --font: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans', system-ui, -apple-system, sans-serif;
-            --mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            --radius: 12px;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            --font-mono: 'Courier New', 'Consolas', 'Fira Code', 'JetBrains Mono', monospace;
+            --transition: 0.25s ease;
         }
-        [data-theme="light"] {
-            --bg: #f4f7fb;
-            --card: #ffffff;
-            --card-hover: #f0f6ff;
-            --border: #d0ddee;
-            --text: #14212e;
-            --text-dim: #52657a;
-            --accent: #009f7f;
-            --accent2: #0077be;
-            --accent-glow: rgba(0, 159, 127, 0.12);
-            --badge-bg: #e2ecf9;
-            --timeline-line: #bfd4eb;
-            --shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
         body {
-            font-family: var(--font);
+            font-family: var(--font-mono);
             background: var(--bg);
             color: var(--text);
-            line-height: 1.6;
-            transition: background 0.3s, color 0.3s;
+            line-height: 1.7;
             min-height: 100vh;
             padding-top: 72px;
+            background-image:
+                linear-gradient(rgba(102, 252, 241, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(102, 252, 241, 0.025) 1px, transparent 1px);
+            background-size: 48px 48px;
+            overflow-x: hidden;
         }
-        body::before {
-            content: "";
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent2);
+            border-radius: 12px;
+        }
+
+        /* ===== 开机终端 ===== */
+        #boot-overlay {
             position: fixed;
             inset: 0;
-            background-image: linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
+            z-index: 9999;
+            background: #0a0f1c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            padding: 24px;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            cursor: pointer;
+        }
+        #boot-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
             pointer-events: none;
-            z-index: 0;
         }
-        .container { max-width: 1100px; margin: 0 auto; padding: 20px 24px 40px; position: relative; z-index: 1; }
-        .navbar {
-            position: fixed; top: 0; left: 0; right: 0;
-            background: rgba(10,14,20,0.85); backdrop-filter: blur(14px);
-            border-bottom: 1px solid var(--border); z-index: 100;
+        .terminal-window {
+            max-width: 720px;
+            width: 100%;
+            background: #0b0e14;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 32px 32px;
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.8), 0 0 40px var(--accent-glow);
         }
-        [data-theme="light"] .navbar { background: rgba(244,247,251,0.9); }
-        .nav-inner {
-            max-width: 1100px; margin: 0 auto; display: flex; align-items: center;
-            justify-content: space-between; padding: 12px 24px; gap: 16px; flex-wrap: wrap;
+        .terminal-window .line {
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 0.95rem;
         }
-        .brand {
-            font-family: var(--mono); font-size: 1.3rem; font-weight: 700;
-            color: var(--accent); letter-spacing: -0.5px; text-shadow: 0 0 16px var(--accent-glow);
+        .terminal-window .prompt {
+            color: var(--accent2);
         }
-        .nav-links { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
-        .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color var(--transition); }
-        .nav-links a:hover { color: var(--accent); }
-        .nav-actions { display: flex; gap: 10px; align-items: center; }
-        .icon-btn {
-            background: var(--card); border: 1px solid var(--border); color: var(--text);
-            border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; transition: all var(--transition); font-size: 1.1rem;
+        .terminal-window .cursor-blink {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background: var(--accent);
+            margin-left: 4px;
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
         }
-        .icon-btn:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
-        .bgm-btn {
-            position: fixed;
-            bottom: 80px;
-            right: 24px;
-            background: var(--card);
-            border: 1px solid var(--accent);
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+        }
+        .terminal-window .enter-hint {
+            margin-top: 18px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            text-align: center;
+        }
+        .terminal-window .enter-hint kbd {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2px 12px;
+            border-radius: 6px;
             color: var(--accent);
+            font-family: var(--font-mono);
+        }
+
+        /* ===== 过渡页 ===== */
+        #intro-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            background: #0a0f1c;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        #intro-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: none;
+        }
+        #intro-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .falling-title {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .falling-title span {
+            display: inline-block;
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-shadow: 0 0 40px var(--accent-glow);
+            opacity: 0;
+            transform: translateY(-100px) scale(0.5);
+            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .falling-title span.drop {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* ===== 导航环 ===== */
+        #nav-ring-overlay {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9997;
+            width: 200px;
+            height: 200px;
+            background: rgba(10, 15, 28, 0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 50%;
+            border: 2px solid var(--accent2);
+            box-shadow: 0 0 40px rgba(102, 252, 241, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0;
+            transform: scale(0.6) rotateX(0deg) rotateY(0deg);
+            pointer-events: none;
+            cursor: default;
+            perspective: 600px;
+        }
+        #nav-ring-overlay.active {
+            opacity: 1;
+            transform: scale(1) rotateX(8deg) rotateY(-8deg);
+            pointer-events: auto;
+        }
+        #nav-ring-overlay.hidden {
+            opacity: 0;
+            transform: scale(0.6) rotateX(0deg) rotateY(0deg);
+            pointer-events: none;
+        }
+
+        .ring-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-style: preserve-3d;
+            animation: ringFloat 6s ease-in-out infinite;
+        }
+        @keyframes ringFloat {
+            0%,
+            100% {
+                transform: rotateY(0deg) rotateX(0deg);
+            }
+            25% {
+                transform: rotateY(4deg) rotateX(2deg);
+            }
+            75% {
+                transform: rotateY(-4deg) rotateX(-2deg);
+            }
+        }
+
+        .ring-center {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            background: rgba(102, 252, 241, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-shadow: 0 0 20px var(--accent-glow);
+            box-shadow: 0 0 30px var(--accent-glow), inset 0 -4px 12px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: transform 0.3s;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 2;
+            user-select: none;
+            transform: translateZ(10px);
+        }
+        .ring-center:hover {
+            transform: scale(1.05) translateZ(15px);
+        }
+
+        .ring-item {
+            position: absolute;
             width: 44px;
             height: 44px;
             border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: var(--bg-card);
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            z-index: 101;
-            font-size: 1.2rem;
-            box-shadow: 0 0 16px var(--accent-glow);
-            transition: all 0.3s;
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            cursor: grab;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), inset 0 -2px 6px rgba(0, 0, 0, 0.3);
+            font-family: var(--font-mono);
+            letter-spacing: 0.5px;
+            z-index: 3;
+            user-select: none;
+            touch-action: none;
+            transition: border-color 0.3s, color 0.3s, box-shadow 0.3s, background 0.3s;
+            transform: translate(-50%, -50%) translateZ(5px);
+            will-change: left, top;
         }
-        .bgm-btn:hover {
-            background: var(--badge-bg);
-            transform: scale(1.1);
+        .ring-item .label {
+            text-align: center;
+            line-height: 1.2;
+            pointer-events: none;
         }
-        .bgm-btn.playing {
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 229, 160, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 229, 160, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 229, 160, 0); }
-        }
-        .hero { display: flex; flex-direction: column; gap: 28px; padding: 24px 0 40px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
-        .hero-top { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-        .avatar-placeholder {
-            width: 110px; height: 110px; border-radius: 18px; background: linear-gradient(135deg, var(--accent), var(--accent2));
-            display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 2.4rem;
-            font-weight: 700; color: #0a0e14; box-shadow: 0 0 30px var(--accent-glow); flex-shrink: 0;
-            overflow: hidden; border: 2px solid var(--accent);
-        }
-        .avatar-placeholder img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .hero-title h1 {
-            font-size: 2.6rem; font-weight: 700; letter-spacing: -1px; line-height: 1.2;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            -webkit-background-clip: text; background-clip: text; color: transparent;
-        }
-        .hero-sub { font-family: var(--mono); color: var(--text-dim); font-size: 1rem; margin-top: 4px; }
-        .hero-desc { max-width: 720px; font-size: 1.05rem; opacity: 0.9; border-left: 3px solid var(--accent); padding-left: 18px; }
-        .badge-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
-        .badge {
-            background: var(--badge-bg); border: 1px solid var(--border); padding: 6px 16px;
-            border-radius: 30px; font-size: 0.85rem; font-weight: 500; color: var(--accent);
-            transition: all 0.2s; font-family: var(--mono);
-        }
-        .badge:hover { border-color: var(--accent); box-shadow: 0 0 14px var(--accent-glow); }
-        .contact-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-        .btn {
-            background: var(--card); border: 1px solid var(--border); color: var(--text);
-            padding: 10px 20px; border-radius: 10px; font-size: 0.9rem; font-weight: 600;
-            cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex;
-            align-items: center; gap: 8px; font-family: var(--font);
-        }
-        .btn-primary { background: var(--accent); color: #0a0e14; border-color: var(--accent); }
-        .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); box-shadow: 0 0 20px var(--accent-glow); }
-        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-        .btn-play {
-            background: var(--accent);
-            color: #0a0e14;
+        .ring-item:hover {
             border-color: var(--accent);
-            padding: 6px 14px;
-            font-size: 0.8rem;
-            border-radius: 8px;
+            color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow), inset 0 -2px 8px rgba(0, 0, 0, 0.2);
+            background: var(--bg-card-hover);
+            z-index: 4;
+        }
+        .ring-item.dragging {
+            cursor: grabbing;
+            z-index: 5;
+            transform: translate(-50%, -50%) scale(1.12) translateZ(20px) !important;
+            border-color: var(--accent);
+            box-shadow: 0 0 30px var(--accent-glow);
+            transition: none;
+        }
+
+        #ring-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            transform: translateZ(0px);
+        }
+        #ring-svg line {
+            stroke: var(--accent2);
+            stroke-width: 1.2;
+            opacity: 0.25;
+            transition: opacity 0.3s, stroke-width 0.3s, stroke 0.3s;
+            filter: drop-shadow(0 0 4px rgba(102, 252, 241, 0.1));
+        }
+        #ring-svg line.active {
+            opacity: 0.7;
+            stroke: var(--accent);
+            stroke-width: 2.5;
+            filter: drop-shadow(0 0 8px rgba(102, 252, 241, 0.3));
+        }
+
+        /* ===== 导航栏 ===== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(11, 12, 16, 0.88);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            font-family: var(--font-mono);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+        .navbar.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .brand {
+            font-size: 1.2rem;
             font-weight: 700;
+            color: var(--accent);
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 12px var(--accent-glow);
             cursor: pointer;
+        }
+        .brand:hover {
+            color: var(--accent2);
+        }
+        .nav-links {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color var(--transition), border-bottom 0.2s;
+            padding-bottom: 4px;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+        }
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+        .nav-links a.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* ===== 主容器 ===== */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px 24px 100px;
+            position: relative;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        .container.visible {
+            opacity: 1;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 24px var(--accent-glow);
+            transform: translateY(-3px);
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-mono);
+        }
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+        }
+
+        .scroll-fade {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .scroll-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .avatar-main {
+            width: 110px;
+            height: 110px;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            background: var(--bg-card);
+            filter: none;
+        }
+        .avatar-main img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .avatar-main:hover {
+            transform: scale(1.04);
+        }
+
+        .hero {
+            padding: 16px 0 32px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 40px;
+        }
+        .hero-top {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .hero-title h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            color: var(--accent);
+            font-family: var(--font-mono);
+        }
+        .hero-sub {
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin-top: 4px;
+        }
+        .hero-desc-wrap {
+            max-width: 720px;
+            border-left: 3px solid var(--accent);
+            padding-left: 18px;
+            margin-top: 12px;
+            min-height: 2.2em;
+        }
+
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .badge {
+            background: var(--badge-bg);
+            border: 1px solid var(--border);
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--accent2);
+            font-family: var(--font-mono);
             transition: all 0.2s;
+        }
+        .badge:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 14px var(--accent-glow);
+        }
+
+        .btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: var(--font-mono);
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-family: var(--mono);
-            text-decoration: none;
-            margin-left: 8px;
         }
-        .btn-play:hover {
+        .btn-primary {
+            background: var(--accent);
+            color: #0b0c10;
+            border-color: var(--accent);
+        }
+        .btn-primary:hover {
             background: var(--accent2);
             border-color: var(--accent2);
-            box-shadow: 0 0 16px var(--accent-glow);
+            box-shadow: 0 0 20px var(--accent-glow);
         }
-        .card {
-            background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 24px; box-shadow: var(--shadow); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-        }
-        .card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 16px 34px rgba(0,0,0,0.4), 0 0 20px var(--accent-glow); }
-        .section-title {
-            font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 24px;
-            display: flex; align-items: center; gap: 12px; font-family: var(--mono);
-        }
-        .section-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--accent), transparent); }
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .highlight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
-        .highlight-item { background: var(--card); border-left: 4px solid var(--accent); padding: 18px 20px; border-radius: 10px; transition: 0.2s; }
-        .highlight-item:hover { background: var(--card-hover); }
-        .highlight-number { font-size: 2rem; font-weight: 700; color: var(--accent); font-family: var(--mono); }
-        .tabs-container { margin-top: 8px; }
-        .tab-list { display: flex; gap: 8px; border-bottom: 2px solid var(--border); padding-bottom: 10px; flex-wrap: wrap; }
-        .tab-btn {
-            background: transparent; border: none; padding: 10px 18px; font-size: 0.95rem;
-            font-weight: 600; color: var(--text-dim); cursor: pointer; border-radius: 8px 8px 0 0;
-            transition: all 0.2s; font-family: var(--font);
-        }
-        .tab-btn[aria-selected="true"] { color: var(--accent); border-bottom: 3px solid var(--accent); background: var(--badge-bg); }
-        .tab-btn:hover { color: var(--accent); }
-        .tab-panel { padding: 20px 0; animation: fadeIn 0.2s ease; }
-        [hidden] { display: none !important; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .project-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; transition: all 0.2s; display: flex; flex-direction: column; gap: 10px; }
-        .project-card:hover { border-color: var(--accent); transform: translateY(-4px); }
-        .project-title { font-weight: 700; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; }
-        .tech-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-        .tech-tag { background: var(--badge-bg); font-family: var(--mono); font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; color: var(--accent2); }
-        .skill-category { margin-bottom: 18px; }
-        .skill-label { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 6px; font-size: 0.95rem; }
-        .progress-bar { width: 100%; height: 8px; background: var(--border); border-radius: 20px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 20px; width: 0%; transition: width 0.6s ease; }
-        .timeline { position: relative; padding-left: 28px; }
-        .timeline-item { position: relative; margin-bottom: 28px; }
-        .timeline-item::before {
-            content: ''; position: absolute; left: -21px; top: 8px; width: 12px; height: 12px;
-            background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent-glow);
-        }
-        .timeline-item::after { content: ''; position: absolute; left: -16px; top: 20px; bottom: -20px; width: 2px; background: var(--timeline-line); }
-        .timeline-item:last-child::after { display: none; }
-        .certificate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px; }
-        .certificate-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; transition: all 0.2s; text-align: center; }
-        .certificate-card:hover { border-color: var(--accent); transform: translateY(-4px); }
-        .certificate-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border); }
-        .certificate-card p { font-size: 0.85rem; color: var(--text-dim); font-family: var(--mono); }
-        .culture-card { margin-bottom: 16px; }
-        .culture-card h4 { color: var(--accent); margin-bottom: 8px; font-size: 1.2rem; }
-        .culture-card ul { padding-left: 20px; }
-        .culture-card li { margin-bottom: 4px; }
-        .photo-placeholder {
-            width: 100%;
-            height: 200px;
-            background: var(--badge-bg);
-            border: 2px dashed var(--border);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-dim);
-            font-family: var(--mono);
-            font-size: 0.95rem;
-            margin-top: 12px;
-            transition: all 0.3s;
-            overflow: hidden;
-        }
-        .photo-placeholder:hover {
+        .btn-outline:hover {
             border-color: var(--accent);
             color: var(--accent);
-            background: var(--card-hover);
+        }
+        .btn:active {
+            transform: scale(0.94);
+        }
+
+        .skill-category {
+            margin-bottom: 18px;
+        }
+        .skill-label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            border-radius: 20px;
+            width: 0%;
+            transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .project-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: all 0.25s ease;
+        }
+        .project-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-glow);
+        }
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0;
+        }
+        .tech-tag {
+            background: var(--badge-bg);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            padding: 2px 12px;
+            border-radius: 20px;
+            color: var(--accent2);
+            border: 1px solid var(--border);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        .highlight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .highlight-item {
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent);
+            padding: 16px 18px;
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+        .highlight-item:hover {
+            background: var(--bg-card-hover);
+            border-left-color: var(--accent2);
+        }
+        .highlight-number {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: var(--font-mono);
+        }
+
+        .photo-placeholder {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: var(--badge-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: filter 0.3s ease, transform 0.3s ease;
+            filter: grayscale(0.7) contrast(0.85);
+        }
+        .photo-placeholder:hover {
+            filter: grayscale(0) contrast(1);
+            transform: scale(1.02);
         }
         .photo-placeholder img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: center;
             display: block;
-            border-radius: 0;
         }
-        .slider-container {
-            width: 100%;
-            height: 200px;
-            overflow: hidden;
-            border-radius: 12px;
-            border: 2px solid var(--border);
-            background: var(--badge-bg);
-            margin-top: 12px;
-            position: relative;
-        }
-        .slider-track {
-            display: flex;
-            gap: 0;
-            animation: slideRight 20s linear infinite;
-            width: max-content;
-            height: 100%;
-        }
-        .slider-track img {
-            height: 100%;
-            width: 300px;
-            object-fit: cover;
-            flex-shrink: 0;
-            border-right: 1px solid var(--border);
-        }
-        .slider-track:hover {
-            animation-play-state: paused;
-        }
-        @keyframes slideRight {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .slider-container:hover .slider-track {
-            animation-play-state: paused;
-        }
-        .culture-photo-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-top: 12px;
-        }
-        .culture-photo-item {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px;
-            transition: all 0.2s;
-        }
-        .culture-photo-item:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-        .culture-photo-item .photo-label {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 8px;
-            font-family: var(--mono);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .culture-photo-item .photo-label::before {
-            content: '▸';
-            color: var(--accent2);
-        }
-        .culture-photo-item .photo-placeholder,
-        .culture-photo-item .slider-container {
-            margin-top: 0;
-        }
-        .culture-photo-item.wide {
-            grid-column: span 2;
-        }
-        .culture-photo-item.wide .slider-container {
-            height: 220px;
-        }
-        .culture-photo-item.wide .slider-track img {
-            width: 320px;
-        }
+
+        /* ===== 爱好 - 纸飞机展示 ===== */
         .hobby-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
+            gap: 20px;
             margin-top: 12px;
         }
         .hobby-item {
-            background: var(--card);
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px;
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            border-radius: var(--radius);
+            padding: 16px;
             text-align: center;
+            transition: all 0.3s;
         }
         .hobby-item:hover {
             border-color: var(--accent);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
         }
-        .hobby-item .hobby-name {
-            font-size: 1.1rem;
-            font-weight: 700;
+        .hobby-item h4 {
             color: var(--accent);
+            font-size: 1.1rem;
             margin-bottom: 8px;
-            font-family: var(--mono);
+            font-family: var(--font-mono);
         }
         .hobby-item p {
+            color: var(--text-dim);
             font-size: 0.85rem;
-            color: var(--text-dim);
-            margin-bottom: 8px;
         }
-        .hobby-photo-placeholder {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            background: var(--badge-bg);
-            border: 2px dashed var(--border);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-dim);
-            font-family: var(--mono);
-            font-size: 0.8rem;
-            transition: all 0.3s;
-            overflow: hidden;
-            margin: 0 auto;
-        }
-        .hobby-photo-placeholder:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: var(--card-hover);
-        }
-        .hobby-photo-placeholder img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            border-radius: 0;
-        }
-        .photo-slideshow {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            overflow: hidden;
-            border-radius: 8px;
-            border: 2px solid var(--border);
-            background: var(--badge-bg);
+
+        .showcase-container {
             position: relative;
-        }
-        .photo-slideshow img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            max-width: 700px;
+            margin: 0 auto;
+            aspect-ratio: 16 / 10;
+            background: #0a0a0a;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 16px;
+            border: 1px solid var(--border);
+            cursor: default;
+        }
+        .showcase-container .showcase-btn {
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: #0b0c10;
+            border: none;
+            padding: 5px 18px;
+            border-radius: 30px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.75rem;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s;
+            box-shadow: 0 0 30px var(--accent-glow);
+            letter-spacing: 1px;
+        }
+        .showcase-container .showcase-btn:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 0 50px var(--accent-glow);
+        }
+        .showcase-container .showcase-btn:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+        .showcase-container .showcase-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: translateX(-50%) scale(0.98);
+        }
+
+        .showcase-images {
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+        }
+        .showcase-images img {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-radius: 8px;
+            object-fit: cover;
             opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+            transition: none;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 30px rgba(102, 252, 241, 0.3);
+            pointer-events: none;
+            transform: translate(-50%, -50%) rotate(0deg);
         }
-        .photo-slideshow img.active {
+        .showcase-images img.flying {
+            width: 160px;
+            height: 120px;
             opacity: 1;
+            transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .game-container {
-            margin-top: 12px;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-            background: var(--badge-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            position: relative;
-            min-height: 300px;
+        .showcase-images img.show {
+            width: 500px;
+            height: 375px;
+            opacity: 1;
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .game-container iframe {
-            width: 100%;
-            height: 500px;
-            border: none;
-            display: block;
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 24px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            margin-top: 40px;
+            font-family: var(--font-mono);
         }
-        .game-link {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 8px 16px;
-            background: var(--accent);
-            color: #0a0e14;
-            border-radius: 8px;
-            font-weight: 700;
-            font-family: var(--mono);
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        .game-link:hover {
-            background: var(--accent2);
-            box-shadow: 0 0 16px var(--accent-glow);
-        }
-        .copy-link-btn {
-            background: var(--card);
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-family: var(--mono);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .copy-link-btn:hover {
-            background: var(--badge-bg);
-            box-shadow: 0 0 12px var(--accent-glow);
-        }
-        footer { border-top: 1px solid var(--border); padding: 28px 24px; text-align: center; color: var(--text-dim); font-size: 0.85rem; margin-top: 40px; }
-        .back-top {
-            position: fixed; bottom: 24px; right: 24px; background: var(--card); border: 1px solid var(--accent);
-            color: var(--accent); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; opacity: 0; transition: opacity 0.3s, transform 0.3s;
-            transform: translateY(20px); z-index: 99; font-size: 1.4rem; box-shadow: 0 0 16px var(--accent-glow);
-        }
-        .back-top.visible { opacity: 1; transform: translateY(0); }
-        @media (max-width: 900px) {
-            .hobby-grid { grid-template-columns: 1fr; }
-            .culture-photo-grid { grid-template-columns: 1fr; }
-            .culture-photo-item.wide { grid-column: span 1; }
-            .photo-placeholder, .slider-container { height: auto; aspect-ratio: 16 / 9; }
-            .slider-track img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
-            .game-container iframe { height: 400px; }
-        }
+
         @media (max-width: 680px) {
-            .nav-inner { padding: 10px 16px; gap: 10px; }
-            .nav-links { gap: 12px; font-size: 0.8rem; }
-            .hero-title h1 { font-size: 2rem; }
-            .container { padding: 12px 16px 24px; }
-            .card { padding: 18px; }
-            .avatar-placeholder { width: 80px; height: 80px; font-size: 1.8rem; }
-            .photo-placeholder, .slider-container { aspect-ratio: 4 / 3; }
-            .slider-track img { aspect-ratio: 4 / 3; }
-            .game-container iframe { height: 320px; }
-            .bgm-btn { bottom: 70px; right: 16px; width: 40px; height: 40px; font-size: 1rem; }
+            .nav-inner { padding: 10px 16px; }
+            .nav-links { gap: 10px; font-size: 0.75rem; }
+            .hero-title h1 { font-size: 1.8rem; }
+            .container { padding: 12px 16px 100px; }
+            .terminal-window { padding: 20px 18px 24px; }
+            .avatar-main { width: 80px; height: 80px; }
+            .falling-title span { font-size: 2.2rem; }
+            #nav-ring-overlay { width: 160px; height: 160px; bottom: 16px; right: 16px; }
+            .ring-center { width: 64px; height: 64px; font-size: 0.9rem; }
+            .ring-item { width: 36px; height: 36px; font-size: 0.5rem; }
+            .hobby-grid { grid-template-columns: 1fr; }
+            .showcase-container { aspect-ratio: 4 / 3; }
+            .showcase-images img.flying { width: 100px; height: 75px; }
+            .showcase-images img.show { width: 300px; height: 225px; }
         }
-        @media print {
-            body { background: #fff; color: #111; padding-top: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .navbar, .back-top, .contact-btns, .icon-btn, .btn-outline, .nav-actions, .bgm-btn { display: none !important; }
-            .container { max-width: 100%; padding: 0; }
-            .card, .highlight-item, .project-card, .certificate-card, .culture-photo-item, .hobby-item { box-shadow: none; border: 1px solid #ccc; }
-            body::before { display: none; }
-            .hero-title h1 { color: #000; background: none; -webkit-background-clip: initial; background-clip: initial; }
-            .badge { background: #eee; color: #000; border-color: #aaa; }
-            .section-title::after { display: none; }
-            .progress-fill { background: #009f7f; }
-            .tab-panel { display: block !important; }
-            .certificate-card img { max-height: 120px; object-fit: contain; }
-            .photo-placeholder { border: 1px solid #aaa; background: #f0f0f0; }
-            .slider-container { display: none; }
-            .culture-photo-grid { grid-template-columns: 1fr 1fr; }
-            .culture-photo-item.wide { grid-column: span 2; }
-            .hobby-grid { grid-template-columns: 1fr 1fr 1fr; }
-            .photo-slideshow { border: 1px solid #aaa; background: #f0f0f0; }
-            .game-container iframe { display: none; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
-            .slider-track { animation: none !important; }
+        @media (max-width: 480px) {
+            .nav-links a { font-size: 0.7rem; }
+            .brand { font-size: 1rem; }
+            .falling-title span { font-size: 1.8rem; gap: 4px; }
+            #nav-ring-overlay { width: 140px; height: 140px; bottom: 12px; right: 12px; }
+            .ring-center { width: 56px; height: 56px; font-size: 0.8rem; }
+            .ring-item { width: 32px; height: 32px; font-size: 0.45rem; }
+            .showcase-images img.flying { width: 70px; height: 52px; }
+            .showcase-images img.show { width: 220px; height: 165px; }
         }
     </style>
 </head>
 <body>
-    <audio id="bgm" loop preload="auto">
-        <source src="个人BGM.mp4" type="audio/mp4">
-        您的浏览器不支持音频播放。
-    </audio>
 
-    <button class="bgm-btn" id="bgmToggle" aria-label="背景音乐开关">🔊</button>
+    <!-- ===== 开机终端 ===== -->
+    <div id="boot-overlay">
+        <div class="terminal-window">
+            <div class="line"><span class="prompt">$</span> systemctl start identity.service</div>
+            <div class="line"><span class="prompt">$</span> ████ 欢迎, 访客 ████</div>
+            <div class="line"><span class="prompt">$</span> 姓名: 陈东弟</div>
+            <div class="line"><span class="prompt">$</span> 方向: 信息安全技术应用 · 大一</div>
+            <div class="line"><span class="prompt">$</span> 状态: <span style="color:#66fcf1;">● 在线</span></div>
+            <div class="line"><span class="prompt">$</span> 认证: 达摩院 AI训练师 (初/高级)</div>
+            <div class="line"><span class="prompt">$</span> 项目: 飞机大战 · Python</div>
+            <div class="line" style="margin-top:16px;"><span class="prompt">$</span> 按 <kbd style="background:var(--bg-card);border:1px solid var(--border);padding:0 12px;border-radius:4px;color:var(--accent);">回车</kbd> 或点击任意位置进入 ... <span class="cursor-blink"></span></div>
+            <div class="enter-hint">⏎ 点击任意位置 / 按 <kbd>Enter</kbd></div>
+        </div>
+    </div>
 
+    <!-- ===== 过渡页 ===== -->
+    <div id="intro-overlay">
+        <div class="falling-title" id="fallingTitle">
+            <span>自</span><span>我</span><span>介</span><span>绍</span><span>一</span><span>下</span><span>吧</span>
+        </div>
+    </div>
+
+    <!-- ===== 导航环 ===== -->
+    <div id="nav-ring-overlay">
+        <div class="ring-container" id="ringContainer">
+            <svg id="ring-svg" viewBox="0 0 200 200">
+                <line id="line1" x1="100" y1="100" x2="100" y2="10" />
+                <line id="line2" x1="100" y1="100" x2="190" y2="100" />
+                <line id="line3" x1="100" y1="100" x2="100" y2="190" />
+                <line id="line4" x1="100" y1="100" x2="10" y2="100" />
+                <line id="line5" x1="100" y1="100" x2="168" y2="32" />
+                <line id="line6" x1="100" y1="100" x2="32" y2="168" />
+                <line id="line7" x1="100" y1="100" x2="168" y2="168" />
+                <line id="line8" x1="100" y1="100" x2="100" y2="100" />
+            </svg>
+            <div class="ring-center" id="ringCenter">了解</div>
+            <div class="ring-item" id="dot1" data-target="skills"><span class="label">技能</span></div>
+            <div class="ring-item" id="dot2" data-target="projects"><span class="label">项目</span></div>
+            <div class="ring-item" id="dot3" data-target="experience"><span class="label">经历</span></div>
+            <div class="ring-item" id="dot4" data-target="certificates"><span class="label">证书</span></div>
+            <div class="ring-item" id="dot5" data-target="contact"><span class="label">联系</span></div>
+            <div class="ring-item" id="dot6" data-target="highlights"><span class="label">亮点</span></div>
+            <div class="ring-item" id="dot7" data-target="selfeval"><span class="label">自我<br>评价</span></div>
+            <div class="ring-item" id="dot8" data-target="hobby"><span class="label">爱好</span></div>
+        </div>
+    </div>
+
+    <!-- ===== 导航栏 ===== -->
     <nav class="navbar" id="navbar">
         <div class="nav-inner">
-            <div class="brand">cdd@security:~$</div>
+            <div class="brand" id="brandHome">cdd@sec:~$</div>
             <div class="nav-links" id="navLinks">
-                <a href="#hero" data-nav>首页</a>
-                <a href="#hobby" data-nav>爱好</a>
-                <a href="#culture" data-nav>家乡</a>
-                <a href="#highlights" data-nav>亮点</a>
-                <a href="#experience" data-nav>经历</a>
-                <a href="#projects" data-nav>项目</a>
-                <a href="#skills" data-nav>技能</a>
-                <a href="#education" data-nav>教育</a>
-            </div>
-            <div class="nav-actions">
-                <button class="icon-btn" id="themeToggle" aria-label="切换深浅色">◐</button>
-                <button class="icon-btn" id="printBtn" aria-label="打印">⎙</button>
+                <a class="active" data-nav="hero">首页</a>
+                <a data-nav="skills">技能</a>
+                <a data-nav="projects">项目</a>
+                <a data-nav="experience">经历</a>
+                <a data-nav="certificates">证书</a>
+                <a data-nav="highlights">亮点</a>
+                <a data-nav="selfeval">自我评价</a>
+                <a data-nav="hobby">爱好</a>
+                <a data-nav="contact">联系</a>
             </div>
         </div>
     </nav>
 
+    <!-- ===== 主内容 ===== -->
     <main class="container" id="mainContent">
-        <!-- 内容会由 JavaScript 渲染 -->
+        <!-- 由 JS 动态渲染 -->
     </main>
-
-    <button class="back-top" id="backTop" aria-label="返回顶部">↑</button>
 
     <footer id="footer">© 2026 陈东弟 · 信息安全技术应用</footer>
 
     <script>
         (function() {
-            const resume = {
+            'use strict';
+
+            // ============================================================
+            //  数据
+            // ============================================================
+            const DATA = {
                 name: '陈东弟',
                 title: '信息安全技术应用 · 大一新生',
                 contact: {
@@ -573,55 +903,6 @@
                     badges: ['智能客服AI训练师', 'OWASP Top 10 基础', 'Python入门', 'PPT展示', '网络安全意识', 'NLP兴趣'],
                     avatar: 'logo.jpg'
                 },
-                hobbies: {
-                    title: '个人爱好',
-                    items: [
-                        { name: '看小说', desc: '喜欢阅读各类小说。', photo: '看小说.jpg' },
-                        { name: '拍照', desc: '喜欢用镜头记录生活，尤其擅长风景。', photos: ['7.jpg', '8.jpg', '9.jpg', '10.jpg', '11.jpg', '12.jpg'] },
-                        { name: '看动漫', desc: '热爱动漫文化，喜欢热血与治愈系作品。', photo: '看动漫.jpg' }
-                    ]
-                },
-                highlights: [
-                    { number: '1', label: '目标明确', desc: '信息安全技术应用专业，已制定大学学习规划' },
-                    { number: '🚀', label: '飞机大战小游戏开发', desc: 'Python / Trae Code | 2026年7月', game: true },
-                    { number: '2', label: '达摩院AI训练师认证（初、高级）', desc: '2026年7-8月，高中毕业后独立完成双证自考' },
-                    { number: '3', label: '自主学习方向', desc: 'Python基础 · 计算机网络入门 · OWASP Top 10' }
-                ],
-                experience: [
-                    {
-                        tab: '教育',
-                        period: '2026年9月 - 至今',
-                        title: '广东轻工职业技术大学',
-                        subtitle: '信息安全技术应用专业（大一新生）',
-                        points: [
-                            '已选定信息安全技术应用专业，规划网络安全、AI安全方向',
-                            '录取后自学Python基础与计算机网络入门课程',
-                            '主动接触专业前置知识，为大学竞赛与项目打基础'
-                        ]
-                    },
-                    {
-                        tab: '暑期实践',
-                        period: '2026年7月 - 8月',
-                        title: '智能客服AI训练（自学）',
-                        subtitle: '达摩院人工智能训练师认证',
-                        points: [
-                            '完成初级、高级两项行业认证',
-                            '通过官方文档、在线课程和社区讨论独立完成学习'
-                        ]
-                    }
-                ],
-                projects: [
-                    {
-                        name: '飞机大战小游戏开发',
-                        tech: ['Python', 'Trae Code', 'Pygame'],
-                        result: '利用自学Python基础，使用Trae Code独立完成飞机大战小游戏开发，包含玩家控制、敌机生成、碰撞检测、计分系统等核心功能模块。通过AI辅助生成基础框架并手动优化代码逻辑，解决了游戏循环优化、碰撞检测精度、键盘事件响应等关键技术问题。在开发过程中加深了对Python面向对象编程的理解，并养成了阅读技术文档和调试代码的习惯。源代码已保存至个人本地仓库，计划入学后上传至GitHub作为个人编程起步作品。',
-                        playable: true,
-                        gameUrl: 'https://67f301d2297846bcb1c7940405653eee.app.workbuddy.link'
-                    },
-                    { name: '待补充：CTF竞赛 / 安全实践', tech: ['信息安全', 'CTF', '渗透测试'], result: '大学期间计划参与的项目', link: '#' },
-                    { name: '待补充：智能客服/AI实训项目', tech: ['NLP', '大模型', '语料标注'], result: '计划结合AI训练师认证开展课程设计', link: '#' },
-                    { name: '待补充：校园网络运维/安全防护', tech: ['网络基础', 'Linux', '安全加固'], result: '计划参与校园网络维护实践', link: '#' }
-                ],
                 skills: [
                     { category: '办公软件', label: 'PPT制作与展示', level: 70 },
                     { category: '语言能力', label: '英语技术文档阅读', level: 70 },
@@ -629,6 +910,43 @@
                     { category: '安全基础', label: 'OWASP Top 10 认知', level: 10 },
                     { category: '编程', label: 'Python基础', level: 10 }
                 ],
+                projects: [{
+                    name: '飞机大战小游戏开发',
+                    tech: ['Python', 'Trae Code', 'Pygame'],
+                    result: '利用自学Python基础，使用Trae Code独立完成飞机大战小游戏开发，包含玩家控制、敌机生成、碰撞检测、计分系统等核心功能模块。通过AI辅助生成基础框架并手动优化代码逻辑，解决了游戏循环优化、碰撞检测精度、键盘事件响应等关键技术问题。在开发过程中加深了对Python面向对象编程的理解，并养成了阅读技术文档和调试代码的习惯。源代码已保存至个人本地仓库，计划入学后上传至GitHub作为个人编程起步作品。',
+                    playable: true,
+                    gameUrl: 'https://67f301d2297846bcb1c7940405653eee.app.workbuddy.link'
+                }, {
+                    name: '待补充：CTF竞赛 / 安全实践',
+                    tech: ['信息安全', 'CTF', '渗透测试'],
+                    result: '大学期间计划参与的项目',
+                    link: '#'
+                }, {
+                    name: '待补充：校园网络运维/安全防护',
+                    tech: ['网络基础', 'Linux', '安全加固'],
+                    result: '计划参与校园网络维护实践',
+                    link: '#'
+                }],
+                experience: [{
+                    tab: '教育',
+                    period: '2026年9月 - 至今',
+                    title: '广东轻工职业技术大学',
+                    subtitle: '信息安全技术应用专业（大一新生）',
+                    points: [
+                        '已选定信息安全技术应用专业，规划网络安全、AI安全方向',
+                        '录取后自学Python基础与计算机网络入门课程',
+                        '主动接触专业前置知识，为大学竞赛与项目打基础'
+                    ]
+                }, {
+                    tab: '暑期实践',
+                    period: '2026年7月 - 8月',
+                    title: '智能客服AI训练（自学）',
+                    subtitle: '达摩院人工智能训练师认证',
+                    points: [
+                        '完成初级、高级两项行业认证',
+                        '通过官方文档、在线课程和社区讨论独立完成学习'
+                    ]
+                }],
                 certificates: [
                     { name: '达摩院智能客服人工智能训练师（高级）', date: '2026年8月', image: 'zhengshu.jpg' },
                     { name: '达摩院智能客服人工智能训练师（初级）', date: '2026年7月', image: '证书.jpg' }
@@ -646,405 +964,871 @@
                     '性格开朗，喜欢与人交流，具备良好的沟通和协作意愿',
                     '对网络安全与AI交叉领域有浓厚兴趣，计划深入学习，成为复合型人才'
                 ],
-                culture: {
-                    hometown: '广东湛江 · 遂溪县江洪镇',
-                    festival: {
-                        name: '江洪开渔节',
-                        date: '每年8月15日至8月21日',
-                        desc: '粤西地区最具代表性的渔文化盛典之一，开渔当天百船齐发、千帆竞渡，场面壮观。节日期间举办渔家大宴、祭海仪式、民俗歌舞展演等活动，集中展现雷州半岛深厚的海洋文化底蕴。'
-                    },
-                    attractions: [
-                        {
-                            category: '自然与海岛风光',
-                            items: [
-                                { name: '仙裙岛', desc: '江洪镇最核心的景点，距离江洪镇不到1公里的狭长小岛。岛上拥有洁白细腻的环岛沙滩（约4公里）和原始森林（木麻黄林），是观赏日落（仙裙夕照）的绝佳地点，适合野营、冲浪和拍照打卡。', photos: ['1.jpg'] },
-                                { name: '西海岸（江洪西海岸）', desc: '原生态海滩，风光酷似未开发前的三亚，退潮时适合赶海，傍晚夕阳西下时景色绝美，是拍照打卡的绝佳地点。', photos: ['2.jpg'] },
-                                { name: '笑口滩', desc: '经过沙滩亮化改造的滨海公园，拥有沙滩、绿植景观，是观赏海景和休闲打卡的网红地标。', photos: ['3.jpg', '4.jpg', '5.jpg'], slider: true, wide: true }
-                            ]
-                        },
-                        {
-                            category: '渔港与市井风情',
-                            items: [
-                                { name: '天光鱼市（江洪渔港）', desc: '江洪渔港的凌晨鱼市，每天凌晨（3:00-8:00）渔船满载而归，鱼市人声鼎沸，是体验渔港烟火气、购买生猛海鲜的绝佳地点。', photos: ['6.jpg'] }
-                            ]
-                        }
-                    ]
+                highlights: [
+                    { number: '1', label: '目标明确', desc: '信息安全技术应用专业，已制定大学学习规划' },
+                    { number: '🚀', label: '飞机大战小游戏开发', desc: 'Python / Trae Code | 2026年7月', game: true },
+                    { number: '2', label: '达摩院AI训练师认证（初、高级）', desc: '2026年7-8月，高中毕业后独立完成双证自考' },
+                    { number: '3', label: '自主学习方向', desc: 'Python基础 · 计算机网络入门 · OWASP Top 10' }
+                ],
+                hobby: {
+                    items: [
+                        { name: '拍照', desc: '喜欢用镜头记录生活，尤其擅长风景。' },
+                        { name: '看小说', desc: '喜欢阅读各类小说，在文字中体验不同人生。' },
+                        { name: '看动漫', desc: '热爱动漫文化，喜欢热血与治愈系作品。' }
+                    ],
+                    photos: ['7.jpg', '12.jpg', '8.jpg', '10.jpg', '9.jpg', '11.jpg']
                 }
             };
 
-            const main = document.getElementById('mainContent');
-            const footer = document.getElementById('footer');
+            // ============================================================
+            //  DOM 引用 & 全局状态
+            // ============================================================
+            const bootOverlay = document.getElementById('boot-overlay');
+            const introOverlay = document.getElementById('intro-overlay');
+            const navRingOverlay = document.getElementById('nav-ring-overlay');
+            const navbar = document.getElementById('navbar');
+            const mainContainer = document.getElementById('mainContent');
+            const fallingSpans = document.querySelectorAll('#fallingTitle span');
+            const brandHome = document.getElementById('brandHome');
+            const ringItems = document.querySelectorAll('.ring-item');
+            const ringCenter = document.getElementById('ringCenter');
+            const ringContainer = document.getElementById('ringContainer');
+            const svgLines = document.querySelectorAll('#ring-svg line');
+            const navLinks = document.querySelectorAll('.nav-links a');
 
-            function renderAll() {
+            let bootDismissed = false;
+            let ringActive = false;
+            let animationId = null;
+            let orbitAngle = 0;
+            const ORBIT_SPEED = 0.006;
+            const ORBIT_RADIUS = 72;
+            const CENTER_X = 100;
+            const CENTER_Y = 100;
+            const DOT_COUNT = ringItems.length;
+
+            const dotOffsets = [];
+            ringItems.forEach((_, i) => {
+                dotOffsets.push((i / DOT_COUNT) * 2 * Math.PI);
+            });
+
+            let dragData = null;
+            let bounceData = null;
+
+            // ============================================================
+            //  1. 开机终端
+            // ============================================================
+            function dismissBoot() {
+                if (bootDismissed) return;
+                bootDismissed = true;
+                bootOverlay.classList.add('hidden');
+                introOverlay.classList.add('active');
+                fallingSpans.forEach((span, i) => {
+                    setTimeout(() => {
+                        span.classList.add('drop');
+                    }, 80 * i);
+                });
+                setTimeout(() => {
+                    introOverlay.classList.remove('active');
+                    introOverlay.classList.add('hidden');
+                    navRingOverlay.classList.add('active');
+                    ringActive = true;
+                    navbar.classList.add('visible');
+                    mainContainer.classList.add('visible');
+                    setTimeout(() => {
+                        initScrollFade();
+                        initSkillBars();
+                        initShowcase();
+                    }, 200);
+                    initNavHighlight();
+                    initCopyButtons();
+                    updateDotPositions(orbitAngle);
+                    updateLines();
+                    startAnimationLoop();
+                }, 1200);
+            }
+
+            bootOverlay.addEventListener('click', dismissBoot);
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !bootOverlay.classList.contains('hidden')) {
+                    dismissBoot();
+                }
+            });
+
+            // ============================================================
+            //  2. 公转 + 文字保持水平
+            // ============================================================
+            function updateDotPositions(angle) {
+                ringItems.forEach((dot, i) => {
+                    const theta = angle + dotOffsets[i];
+                    const x = CENTER_X + ORBIT_RADIUS * Math.cos(theta);
+                    const y = CENTER_Y + ORBIT_RADIUS * Math.sin(theta);
+                    dot.style.left = x + 'px';
+                    dot.style.top = y + 'px';
+                    dot.style.transform = 'translate(-50%, -50%) translateZ(5px)';
+                });
+            }
+
+            // ============================================================
+            //  3. 动画循环
+            // ============================================================
+            function startAnimationLoop() {
+                function loop() {
+                    if (!ringActive) {
+                        animationId = requestAnimationFrame(loop);
+                        return;
+                    }
+                    if (dragData) {
+                        updateLines();
+                        animationId = requestAnimationFrame(loop);
+                        return;
+                    }
+                    if (bounceData) {
+                        const b = bounceData;
+                        const dx = b.targetX - b.startX;
+                        const dy = b.targetY - b.startY;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 0.5) {
+                            b.dot.style.left = b.targetX + 'px';
+                            b.dot.style.top = b.targetY + 'px';
+                            b.dot.style.transform = 'translate(-50%, -50%) translateZ(5px)';
+                            bounceData = null;
+                            updateLines();
+                            animationId = requestAnimationFrame(loop);
+                            return;
+                        }
+                        const stiffness = 0.08;
+                        const damping = 0.92;
+                        b.velocityX += (b.targetX - b.startX) * stiffness;
+                        b.velocityY += (b.targetY - b.startY) * stiffness;
+                        b.velocityX *= damping;
+                        b.velocityY *= damping;
+                        b.startX += b.velocityX;
+                        b.startY += b.velocityY;
+                        b.dot.style.left = b.startX + 'px';
+                        b.dot.style.top = b.startY + 'px';
+                        b.dot.style.transform = 'translate(-50%, -50%) translateZ(5px)';
+                        updateLines();
+                        animationId = requestAnimationFrame(loop);
+                        return;
+                    }
+                    orbitAngle += ORBIT_SPEED;
+                    updateDotPositions(orbitAngle);
+                    updateLines();
+                    animationId = requestAnimationFrame(loop);
+                }
+                loop();
+            }
+
+            // ============================================================
+            //  4. 拖拽系统
+            // ============================================================
+            function setupDrag(dot, index) {
+                let isDragging = false;
+
+                function onPointerDown(e) {
+                    e.preventDefault();
+                    const pos = getPointerPos(e);
+                    const rect = dot.getBoundingClientRect();
+                    const containerRect = ringContainer.getBoundingClientRect();
+                    const dotCenterX = rect.left + rect.width / 2 - containerRect.left;
+                    const dotCenterY = rect.top + rect.height / 2 - containerRect.top;
+
+                    isDragging = true;
+                    dot.classList.add('dragging');
+                    dragData = {
+                        dot: dot,
+                        index: index,
+                        startX: dotCenterX,
+                        startY: dotCenterY,
+                        offsetX: pos.x - rect.left - rect.width / 2,
+                        offsetY: pos.y - rect.top - rect.height / 2,
+                        containerRect: containerRect
+                    };
+                    bounceData = null;
+                    dot.style.transition = 'none';
+                }
+
+                function onPointerMove(e) {
+                    if (!isDragging || !dragData) return;
+                    e.preventDefault();
+                    const pos = getPointerPos(e);
+                    const containerRect = dragData.containerRect;
+                    const newX = pos.x - containerRect.left - dragData.offsetX;
+                    const newY = pos.y - containerRect.top - dragData.offsetY;
+                    const clampedX = Math.max(10, Math.min(newX, containerRect.width - 10));
+                    const clampedY = Math.max(10, Math.min(newY, containerRect.height - 10));
+                    dragData.dot.style.left = clampedX + 'px';
+                    dragData.dot.style.top = clampedY + 'px';
+                    dragData.dot.style.transform = 'translate(-50%, -50%) translateZ(5px)';
+                    updateLines();
+                }
+
+                function onPointerUp(e) {
+                    if (!isDragging || !dragData) return;
+                    isDragging = false;
+                    dot.classList.remove('dragging');
+                    const currentAngle = orbitAngle + dotOffsets[index];
+                    const targetX = CENTER_X + ORBIT_RADIUS * Math.cos(currentAngle);
+                    const targetY = CENTER_Y + ORBIT_RADIUS * Math.sin(currentAngle);
+
+                    const rect = dot.getBoundingClientRect();
+                    const containerRect = ringContainer.getBoundingClientRect();
+                    const curX = rect.left + rect.width / 2 - containerRect.left;
+                    const curY = rect.top + rect.height / 2 - containerRect.top;
+
+                    const dx = targetX - curX;
+                    const dy = targetY - curY;
+                    if (Math.sqrt(dx * dx + dy * dy) < 2) {
+                        dot.style.left = targetX + 'px';
+                        dot.style.top = targetY + 'px';
+                        dot.style.transform = 'translate(-50%, -50%) translateZ(5px)';
+                        updateLines();
+                    } else {
+                        bounceData = {
+                            dot: dot,
+                            startX: curX,
+                            startY: curY,
+                            targetX: targetX,
+                            targetY: targetY,
+                            velocityX: 0,
+                            velocityY: 0
+                        };
+                    }
+                    dragData = null;
+                    updateLines();
+                }
+
+                dot.addEventListener('mousedown', onPointerDown);
+                document.addEventListener('mousemove', onPointerMove);
+                document.addEventListener('mouseup', onPointerUp);
+
+                dot.addEventListener('touchstart', function(e) {
+                    const touch = e.touches[0];
+                    const me = new MouseEvent('mousedown', {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY,
+                    });
+                    dot.dispatchEvent(me);
+                    e.preventDefault();
+                }, { passive: false });
+
+                document.addEventListener('touchmove', function(e) {
+                    if (!dragData) return;
+                    const touch = e.touches[0];
+                    const me = new MouseEvent('mousemove', {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY,
+                    });
+                    document.dispatchEvent(me);
+                    e.preventDefault();
+                }, { passive: false });
+
+                document.addEventListener('touchend', function(e) {
+                    if (!dragData) return;
+                    const me = new MouseEvent('mouseup', {});
+                    document.dispatchEvent(me);
+                }, { passive: false });
+
+                dot.addEventListener('click', function(e) {
+                    if (dragData) return;
+                    const target = this.dataset.target;
+                    const section = document.getElementById(target);
+                    if (section) {
+                        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        navLinks.forEach(a => {
+                            a.classList.toggle('active', a.dataset.nav === target);
+                        });
+                    }
+                    const idx = Array.from(ringItems).indexOf(this);
+                    if (idx < svgLines.length) {
+                        svgLines[idx].classList.add('active');
+                        setTimeout(() => {
+                            svgLines[idx].classList.remove('active');
+                        }, 800);
+                    }
+                });
+
+                dot.addEventListener('mouseenter', function() {
+                    const idx = Array.from(ringItems).indexOf(this);
+                    if (idx < svgLines.length) {
+                        svgLines[idx].classList.add('active');
+                    }
+                });
+                dot.addEventListener('mouseleave', function() {
+                    const idx = Array.from(ringItems).indexOf(this);
+                    if (idx < svgLines.length) {
+                        svgLines[idx].classList.remove('active');
+                    }
+                });
+            }
+
+            function getPointerPos(e) {
+                if (e.touches) {
+                    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                }
+                return { x: e.clientX, y: e.clientY };
+            }
+
+            // ============================================================
+            //  5. 连线更新
+            // ============================================================
+            function updateLines() {
+                const dots = document.querySelectorAll('.ring-item');
+                const containerRect = ringContainer.getBoundingClientRect();
+                const cRect = ringCenter.getBoundingClientRect();
+                const cX = cRect.left + cRect.width / 2 - containerRect.left;
+                const cY = cRect.top + cRect.height / 2 - containerRect.top;
+
+                dots.forEach((dot, i) => {
+                    const rect = dot.getBoundingClientRect();
+                    const dx = rect.left + rect.width / 2 - containerRect.left;
+                    const dy = rect.top + rect.height / 2 - containerRect.top;
+                    if (i < svgLines.length) {
+                        svgLines[i].setAttribute('x1', cX);
+                        svgLines[i].setAttribute('y1', cY);
+                        svgLines[i].setAttribute('x2', dx);
+                        svgLines[i].setAttribute('y2', dy);
+                    }
+                });
+            }
+
+            window.addEventListener('resize', () => {
+                if (ringActive) updateLines();
+            });
+
+            // ============================================================
+            //  6. 导航栏点击跳转
+            // ============================================================
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = this.dataset.nav;
+                    const section = document.getElementById(target);
+                    if (section) {
+                        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        navLinks.forEach(a => a.classList.remove('active'));
+                        this.classList.add('active');
+                    }
+                });
+            });
+
+            // ============================================================
+            //  7. 交互：点击中心切换环
+            // ============================================================
+            ringCenter.addEventListener('click', function() {
+                if (ringActive) {
+                    navRingOverlay.classList.remove('active');
+                    navRingOverlay.classList.add('hidden');
+                    ringActive = false;
+                } else {
+                    navRingOverlay.classList.remove('hidden');
+                    navRingOverlay.classList.add('active');
+                    ringActive = true;
+                    updateLines();
+                }
+            });
+
+            brandHome.addEventListener('click', function() {
+                if (!ringActive && !introOverlay.classList.contains('active') && !bootOverlay.classList.contains(
+                        'active')) {
+                    navRingOverlay.classList.remove('hidden');
+                    navRingOverlay.classList.add('active');
+                    ringActive = true;
+                    updateLines();
+                }
+            });
+
+            // ============================================================
+            //  8. 初始化拖拽
+            // ============================================================
+            ringItems.forEach((dot, i) => {
+                setupDrag(dot, i);
+            });
+
+            // ============================================================
+            //  9. 纸飞机展示 - 照片最大化，几乎占满按钮上方空间
+            // ============================================================
+            function initShowcase() {
+                const container = document.getElementById('showcaseContainer');
+                if (!container) return;
+                const btn = document.getElementById('showcaseBtn');
+                const imagesContainer = document.getElementById('showcaseImages');
+                if (!btn || !imagesContainer) return;
+
+                const photoList = DATA.hobby.photos;
+                let isPlaying = false;
+                let currentIndex = 0;
+                let imgElements = [];
+                let autoTimer = null;
+
+                photoList.forEach((src, i) => {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.dataset.index = i;
+                    img.style.left = '50%';
+                    img.style.top = '50%';
+                    img.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+                    img.style.width = '0';
+                    img.style.height = '0';
+                    img.style.opacity = '0';
+                    img.style.borderRadius = '8px';
+                    img.style.objectFit = 'cover';
+                    img.style.border = '2px solid var(--accent)';
+                    img.style.boxShadow = '0 0 30px rgba(102, 252, 241, 0.3)';
+                    imagesContainer.appendChild(img);
+                    imgElements.push(img);
+                });
+
+                function getRandomStartPosition(w, h) {
+                    const side = Math.floor(Math.random() * 4);
+                    switch (side) {
+                        case 0: return { x: -60 - Math.random() * 100, y: Math.random() * h };
+                        case 1: return { x: w + 60 + Math.random() * 100, y: Math.random() * h };
+                        case 2: return { x: Math.random() * w, y: -60 - Math.random() * 100 };
+                        case 3: return { x: Math.random() * w, y: h + 60 + Math.random() * 100 };
+                        default: return { x: -100, y: Math.random() * h };
+                    }
+                }
+
+                function getBezierPath(startX, startY, endX, endY) {
+                    const cx1 = startX + (endX - startX) * 0.2 + (Math.random() - 0.5) * 150;
+                    const cy1 = startY + (endY - startY) * 0.3 + (Math.random() - 0.5) * 120;
+                    const cx2 = startX + (endX - startX) * 0.7 + (Math.random() - 0.5) * 150;
+                    const cy2 = startY + (endY - startY) * 0.6 + (Math.random() - 0.5) * 120;
+                    return { cx1, cy1, cx2, cy2 };
+                }
+
+                function flyNext() {
+                    if (isPlaying) return;
+                    if (currentIndex >= photoList.length) {
+                        btn.textContent = '✨ 全部展示';
+                        btn.disabled = true;
+                        return;
+                    }
+
+                    isPlaying = true;
+                    btn.disabled = true;
+                    btn.textContent = '✈️ 飞行中...';
+
+                    const rect = container.getBoundingClientRect();
+                    const w = container.offsetWidth || rect.width;
+                    const h = container.offsetHeight || rect.height;
+                    const centerX = w / 2;
+                    const centerY = h / 2;
+
+                    const img = imgElements[currentIndex];
+                    const start = getRandomStartPosition(w, h);
+                    const endX = centerX + (Math.random() - 0.5) * 10;
+                    const endY = centerY + (Math.random() - 0.5) * 8;
+
+                    img.style.left = start.x + 'px';
+                    img.style.top = start.y + 'px';
+                    img.style.width = '0';
+                    img.style.height = '0';
+                    img.style.opacity = '0';
+                    img.style.transform = 'translate(-50%, -50%) rotate(' + (Math.random() * 60 - 30) + 'deg)';
+                    img.style.transition = 'none';
+                    img.offsetHeight;
+
+                    const duration = 1000;
+                    const startTime = performance.now();
+                    const startX = start.x;
+                    const startY = start.y;
+                    const path = getBezierPath(startX, startY, endX, endY);
+
+                    // 最终展示尺寸 - 几乎占满容器 (留出按钮空间)
+                    const size = Math.min(w, h) * 0.82;
+                    const flySize = Math.min(w, h) * 0.20;
+
+                    function animateFly(time) {
+                        const elapsed = time - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        const eased = 1 - Math.pow(1 - progress, 3);
+
+                        const t = eased;
+                        const x = Math.pow(1 - t, 3) * startX +
+                            3 * Math.pow(1 - t, 2) * t * path.cx1 +
+                            3 * (1 - t) * Math.pow(t, 2) * path.cx2 +
+                            Math.pow(t, 3) * endX;
+                        const y = Math.pow(1 - t, 3) * startY +
+                            3 * Math.pow(1 - t, 2) * t * path.cy1 +
+                            3 * (1 - t) * Math.pow(t, 2) * path.cy2 +
+                            Math.pow(t, 3) * endY;
+
+                        const currentSize = flySize * (0.2 + 0.8 * eased);
+                        const rotation = (1 - eased) * 30 + eased * 0;
+
+                        img.style.left = x + 'px';
+                        img.style.top = y + 'px';
+                        img.style.width = currentSize + 'px';
+                        img.style.height = (currentSize * 0.75) + 'px';
+                        img.style.opacity = 0.3 + 0.7 * eased;
+                        img.style.transform = 'translate(-50%, -50%) rotate(' + rotation + 'deg)';
+
+                        if (progress < 1) {
+                            requestAnimationFrame(animateFly);
+                        } else {
+                            img.style.width = size + 'px';
+                            img.style.height = (size * 0.75) + 'px';
+                            img.style.opacity = '1';
+                            img.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+                            img.style.transition = 'all 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
+                            img.style.borderRadius = '10px';
+                            img.style.border = '2px solid var(--accent)';
+                            img.style.boxShadow = '0 0 50px rgba(102, 252, 241, 0.5)';
+                            img.style.left = centerX + 'px';
+                            img.style.top = centerY + 'px';
+                            img.classList.add('show');
+
+                            currentIndex++;
+                            isPlaying = false;
+                            btn.disabled = false;
+
+                            if (currentIndex < photoList.length) {
+                                btn.textContent = '✈️ 下一张';
+                                autoTimer = setTimeout(() => {
+                                    flyNext();
+                                }, 900);
+                            } else {
+                                btn.textContent = '✨ 全部展示';
+                                btn.disabled = true;
+                            }
+                        }
+                    }
+                    requestAnimationFrame(animateFly);
+                }
+
+                function resetAll() {
+                    if (autoTimer) {
+                        clearTimeout(autoTimer);
+                        autoTimer = null;
+                    }
+                    currentIndex = 0;
+                    isPlaying = false;
+                    imgElements.forEach(img => {
+                        img.style.width = '0';
+                        img.style.height = '0';
+                        img.style.opacity = '0';
+                        img.style.left = '50%';
+                        img.style.top = '50%';
+                        img.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+                        img.style.transition = 'none';
+                        img.classList.remove('show', 'flying');
+                    });
+                    btn.textContent = '✈️ 来吧，展示！';
+                    btn.disabled = false;
+                }
+
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (isPlaying) return;
+                    if (currentIndex >= photoList.length) {
+                        resetAll();
+                        setTimeout(() => {
+                            flyNext();
+                        }, 300);
+                        return;
+                    }
+                    flyNext();
+                });
+            }
+
+            // ============================================================
+            //  10. 渲染主内容
+            // ============================================================
+            function renderMain() {
                 let html = '';
 
-                // Hero
                 html += `
                 <section class="hero" id="hero">
                     <div class="hero-top">
-                        <div class="avatar-placeholder">
-                            <img src="${resume.hero.avatar}" alt="陈东弟的大头照" onerror="this.parentElement.textContent='CD'">
+                        <div class="avatar-main">
+                            <img src="${DATA.hero.avatar}" alt="陈东弟" onerror="this.parentElement.textContent='CD'">
                         </div>
                         <div class="hero-title">
-                            <h1>${resume.name}</h1>
-                            <div class="hero-sub">${resume.title}</div>
+                            <h1>${DATA.name}</h1>
+                            <div class="hero-sub">${DATA.title}</div>
                         </div>
                     </div>
-                    <p class="hero-desc">${resume.hero.intro}</p>
+                    <div class="hero-desc-wrap">
+                        <span>${DATA.hero.intro}</span>
+                    </div>
                     <div class="badge-row">
-                        ${resume.hero.badges.map(b => `<span class="badge">${b}</span>`).join('')}
+                        ${DATA.hero.badges.map(b => `<span class="badge">${b}</span>`).join('')}
                     </div>
-                    <div class="contact-btns">
-                        <a class="btn btn-primary" href="tel:${resume.contact.phone}">📞 电话</a>
-                        <button class="btn btn-outline" id="copyEmail">📋 复制邮箱</button>
-                        <button class="btn btn-outline" id="copyWechat">💬 复制微信</button>
-                        <button class="btn btn-outline" id="copyQQ">🐧 复制QQ</button>
-                        <span class="btn btn-outline" style="cursor:default;">📍 ${resume.contact.address}</span>
-                    </div>
-                </section>`;
-
-                // 个人爱好
-                html += `
-                <section id="hobby" style="margin-bottom: 48px;">
-                    <div class="section-title">🎯 个人爱好</div>
-                    <div class="card">
-                        <div class="hobby-grid">
-                            ${resume.hobbies.items.map(item => `
-                                <div class="hobby-item">
-                                    <div class="hobby-name">${item.name}</div>
-                                    <p>${item.desc}</p>
-                                    ${item.photos ? `
-                                        <div class="photo-slideshow" id="photoSlideshow">
-                                            ${item.photos.map((p, idx) => `<img src="${p}" alt="${item.name}照片${idx+1}" class="${idx===0?'active':''}" onerror="this.style.display='none'">`).join('')}
-                                        </div>
-                                    ` : `
-                                        <div class="hobby-photo-placeholder"><img src="${item.photo}" alt="${item.name}照片" onerror="this.parentElement.innerHTML='照片位置 · 待添加'"></div>
-                                    `}
-                                </div>
-                            `).join('')}
-                        </div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+                        <a class="btn btn-primary" href="tel:${DATA.contact.phone}">📞 电话</a>
+                        <button class="btn btn-outline" id="copyEmail">📋 邮箱</button>
+                        <button class="btn btn-outline" id="copyWechat">💬 微信</button>
+                        <button class="btn btn-outline" id="copyQQ">🐧 QQ</button>
+                        <span class="btn" style="cursor:default;border-color:var(--border);">📍 ${DATA.contact.address}</span>
                     </div>
                 </section>`;
 
-                // 家乡与民俗文化
                 html += `
-                <section id="culture" style="margin-bottom: 48px;">
-                    <div class="section-title">🏖️ 家乡与民俗文化</div>
-                    <div class="card culture-card">
-                        <h4>📍 ${resume.culture.hometown}</h4>
-                        <p style="margin-bottom:12px;"><strong>特色节日——${resume.culture.festival.name}</strong>（${resume.culture.festival.date}）</p>
-                        <p style="color:var(--text-dim);">${resume.culture.festival.desc}</p>
-                        <div style="margin-top: 16px;">
-                            ${resume.culture.attractions.map(cat => `
-                                <p style="font-weight:600;margin-top:16px;margin-bottom:8px;">🏝️ ${cat.category}</p>
-                                <div class="culture-photo-grid">
-                                    ${cat.items.map(item => `
-                                        <div class="culture-photo-item ${item.wide ? 'wide' : ''}">
-                                            <div class="photo-label">${item.name}</div>
-                                            <p style="font-size:0.9rem;color:var(--text-dim);margin-bottom:8px;">${item.desc}</p>
-                                            ${item.slider ? `
-                                                <div class="slider-container">
-                                                    <div class="slider-track">
-                                                        ${item.photos.map(p => `<img src="${p}" alt="${item.name}照片" onerror="this.style.display='none'">`).join('')}
-                                                        ${item.photos.map(p => `<img src="${p}" alt="${item.name}照片" onerror="this.style.display='none'">`).join('')}
-                                                    </div>
-                                                </div>
-                                            ` : `
-                                                ${item.photos.map(p => `
-                                                    <div class="photo-placeholder"><img src="${p}" alt="${item.name}照片" onerror="this.parentElement.innerHTML='照片位置 · 待添加'"></div>
-                                                `).join('')}
-                                            `}
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                </section>`;
-
-                // 亮点成果
-                html += `
-                <section id="highlights" style="margin-bottom: 48px;">
-                    <div class="section-title">⚡ 亮点成果</div>
-                    <div class="highlight-grid">
-                        ${resume.highlights.map(h => `
-                            <div class="highlight-item">
-                                <div class="highlight-number">${h.number}</div>
-                                <div><strong>${h.label}</strong> ${h.game ? '<button class="btn-play" id="playGameBtn">玩一玩</button>' : ''}</div>
-                                <div style="color:var(--text-dim);font-size:0.9rem;">${h.desc}</div>
-                            </div>`).join('')}
-                    </div>
-                </section>`;
-
-                // 经历 Tabs
-                html += `
-                <section id="experience" style="margin-bottom: 48px;">
-                    <div class="section-title">📌 经历</div>
-                    <div class="tabs-container" id="expTabs">
-                        <div class="tab-list" role="tablist" aria-label="经历标签">
-                            ${resume.experience.map((exp, i) => `
-                                <button class="tab-btn" role="tab" aria-selected="${i===0}" aria-controls="exp-panel-${i}" id="exp-tab-${i}" tabindex="${i===0?0:-1}">${exp.tab}</button>`).join('')}
-                        </div>
-                        ${resume.experience.map((exp, i) => `
-                            <div class="tab-panel" role="tabpanel" id="exp-panel-${i}" aria-labelledby="exp-tab-${i}" ${i!==0?'hidden':''}>
-                                <div class="timeline">
-                                    <div class="timeline-item">
-                                        <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
-                                            <strong style="font-size:1.2rem;">${exp.title}</strong>
-                                            <span style="color:var(--accent);font-family:var(--mono);">${exp.period}</span>
-                                        </div>
-                                        <div style="color:var(--text-dim); margin-bottom:8px;">${exp.subtitle}</div>
-                                        <ul style="padding-left:20px;">
-                                            ${exp.points.map(p => `<li>${p}</li>`).join('')}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>`).join('')}
-                    </div>
-                </section>`;
-
-                // 项目 Tabs
-                html += `
-                <section id="projects" style="margin-bottom: 48px;">
-                    <div class="section-title">🚀 项目</div>
-                    <div class="tabs-container" id="projTabs">
-                        <div class="tab-list" role="tablist" aria-label="项目标签">
-                            ${resume.projects.map((p, i) => `
-                                <button class="tab-btn" role="tab" aria-selected="${i===0}" aria-controls="proj-panel-${i}" id="proj-tab-${i}" tabindex="${i===0?0:-1}">${p.name}</button>`).join('')}
-                        </div>
-                        ${resume.projects.map((proj, i) => `
-                            <div class="tab-panel" role="tabpanel" id="proj-panel-${i}" aria-labelledby="proj-tab-${i}" ${i!==0?'hidden':''}>
-                                <div class="project-card">
-                                    <div class="project-title"><span>${proj.name}</span>${proj.playable ? '<button class="btn-play" id="startGameBtn">飞机大战开始体验</button>' : '<span style="color:var(--accent);">↗</span>'}</div>
-                                    <div class="tech-tags">${proj.tech.map(t => `<span class="tech-tag">${t}</span>`).join('')}</div>
-                                    <div style="font-size:0.9rem;color:var(--text-dim);">${proj.result}</div>
-                                    ${proj.playable ? `
-                                        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
-                                            <a class="game-link" href="${proj.gameUrl}" target="_blank" rel="noopener noreferrer">🔗 游戏链接</a>
-                                            <button class="copy-link-btn" id="copyGameLink" data-url="${proj.gameUrl}">📋 复制链接</button>
-                                        </div>
-                                    ` : ''}
-                                    ${proj.playable ? `<div class="game-container" id="gameContainer"><iframe src="${proj.gameUrl}" title="飞机大战游戏" allow="autoplay; fullscreen" allowfullscreen></iframe></div>` : ''}
-                                </div>
-                            </div>`).join('')}
-                    </div>
-                </section>`;
-
-                // 技能矩阵
-                html += `
-                <section id="skills" style="margin-bottom: 48px;">
+                <section id="skills" class="scroll-fade" style="margin-bottom:48px;">
                     <div class="section-title">🧠 技能矩阵</div>
                     <div class="grid-2">
-                        ${resume.skills.map(s => `
-                            <div class="skill-category">
+                        ${DATA.skills.map(s => `
+                            <div class="skill-category" data-level="${s.level}">
                                 <div class="skill-label"><span>${s.category} · ${s.label}</span><span>${s.level}%</span></div>
-                                <div class="progress-bar"><div class="progress-fill" style="width:${s.level}%"></div></div>
-                            </div>`).join('')}
+                                <div class="progress-bar"><div class="progress-fill" style="width:0%;"></div></div>
+                            </div>
+                        `).join('')}
                     </div>
                 </section>`;
 
-                // 教育与证书
                 html += `
-                <section id="education" style="margin-bottom: 48px;">
-                    <div class="section-title">🎓 教育与证书</div>
+                <section id="projects" class="scroll-fade" style="margin-bottom:48px;">
+                    <div class="section-title">🚀 项目</div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;">
+                        ${DATA.projects.map(p => `
+                            <div class="project-card">
+                                <div style="font-weight:700;font-size:1.2rem;">${p.name}</div>
+                                <div class="tech-tags">${p.tech.map(t => `<span class="tech-tag">${t}</span>`).join('')}</div>
+                                <div style="font-size:0.9rem;color:var(--text-dim);margin:8px 0;">${p.result}</div>
+                                ${p.playable ? `<a class="btn btn-primary" href="${p.gameUrl}" target="_blank" style="margin-top:6px;">🎮 体验游戏</a>` : ''}
+                                ${p.link && p.link !== '#' ? `<a class="btn btn-outline" href="${p.link}" style="margin-top:6px;">↗ 详情</a>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </section>`;
+
+                html += `
+                <section id="experience" class="scroll-fade" style="margin-bottom:48px;">
+                    <div class="section-title">📌 经历</div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;">
+                        ${DATA.experience.map(exp => `
+                            <div class="card">
+                                <div style="display:flex;justify-content:space-between;flex-wrap:wrap;">
+                                    <strong style="font-size:1.1rem;">${exp.title}</strong>
+                                    <span style="color:var(--accent);font-size:0.85rem;">${exp.period}</span>
+                                </div>
+                                <div style="color:var(--text-dim);margin:4px 0 8px;">${exp.subtitle}</div>
+                                <ul style="padding-left:20px;font-size:0.9rem;">
+                                    ${exp.points.map(p => `<li>${p}</li>`).join('')}
+                                </ul>
+                            </div>
+                        `).join('')}
+                    </div>
+                </section>`;
+
+                html += `
+                <section id="certificates" class="scroll-fade" style="margin-bottom:48px;">
+                    <div class="section-title">🎓 证书 & 教育</div>
                     <div class="grid-2">
                         <div class="card">
-                            <h3 style="margin-bottom:8px;">${resume.education.school}</h3>
-                            <div style="color:var(--accent);font-family:var(--mono);">${resume.education.period}</div>
-                            <p>${resume.education.major}</p>
-                            <p style="color:var(--text-dim);font-size:0.9rem;">${resume.education.details}</p>
+                            <h3 style="margin-bottom:8px;">${DATA.education.school}</h3>
+                            <div style="color:var(--accent);font-family:var(--font-mono);">${DATA.education.period}</div>
+                            <p>${DATA.education.major}</p>
+                            <p style="color:var(--text-dim);font-size:0.9rem;">${DATA.education.details}</p>
                         </div>
                         <div class="card">
                             <h3 style="margin-bottom:12px;">证书</h3>
-                            <div class="certificate-grid">
-                                ${resume.certificates.map(c => `
-                                    <div class="certificate-card">
-                                        <img src="${c.image}" alt="${c.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                                        <div style="display:none;width:100%;height:150px;background:var(--badge-bg);border-radius:8px;align-items:center;justify-content:center;font-family:var(--mono);color:var(--text-dim);">证书图片</div>
-                                        <p>${c.name} · ${c.date}</p>
-                                    </div>`).join('')}
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                                ${DATA.certificates.map(c => `
+                                    <div style="background:var(--badge-bg);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border);transition:0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+                                        <div class="photo-placeholder" style="aspect-ratio:1/1;margin-bottom:6px;filter:grayscale(0.5);">
+                                            <img src="${c.image}" alt="${c.name}" onerror="this.parentElement.innerHTML='📄'">
+                                        </div>
+                                        <div style="font-size:0.75rem;color:var(--text-dim);">${c.name}</div>
+                                        <div style="font-size:0.7rem;color:var(--accent2);">${c.date}</div>
+                                    </div>
+                                `).join('')}
                             </div>
                         </div>
                     </div>
                 </section>`;
 
-                // 自我评价
                 html += `
-                <section id="selfeval" style="margin-bottom: 24px;">
+                <section id="highlights" class="scroll-fade" style="margin-bottom:48px;">
+                    <div class="section-title">⚡ 亮点</div>
+                    <div class="highlight-grid">
+                        ${DATA.highlights.map(h => `
+                            <div class="highlight-item">
+                                <div class="highlight-number">${h.number}</div>
+                                <div><strong>${h.label}</strong> ${h.game ? '<span style="color:var(--accent);font-size:0.8rem;">🎮</span>' : ''}</div>
+                                <div style="color:var(--text-dim);font-size:0.85rem;">${h.desc}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </section>`;
+
+                html += `
+                <section id="selfeval" class="scroll-fade" style="margin-bottom:48px;">
                     <div class="section-title">💬 自我评价</div>
                     <div class="card">
-                        <ul style="padding-left:20px; display:flex; flex-direction:column; gap:8px;">
-                            ${resume.selfEval.map(se => `<li>${se}</li>`).join('')}
+                        <ul style="padding-left:20px;display:flex;flex-direction:column;gap:6px;">
+                            ${DATA.selfEval.map(se => `<li>${se}</li>`).join('')}
                         </ul>
                     </div>
                 </section>`;
 
-                main.innerHTML = html;
-                initInteractions();
-                initSlideshow();
+                // ===== 爱好板块 =====
+                html += `
+                <section id="hobby" class="scroll-fade" style="margin-bottom:48px;">
+                    <div class="section-title">🎯 爱好</div>
+                    <div class="hobby-grid">
+                        ${DATA.hobby.items.map(item => `
+                            <div class="hobby-item">
+                                <h4>${item.name}</h4>
+                                <p>${item.desc}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="margin-top:20px;">
+                        <div class="section-title" style="font-size:1.2rem;">📸 拍照作品</div>
+                        <div class="showcase-container" id="showcaseContainer">
+                            <div class="showcase-images" id="showcaseImages"></div>
+                            <button class="showcase-btn" id="showcaseBtn">✈️ 来吧，展示！</button>
+                        </div>
+                    </div>
+                </section>`;
+
+                html += `
+                <section id="contact" class="scroll-fade" style="margin-bottom:24px;">
+                    <div class="section-title">📬 联系方式</div>
+                    <div class="card" style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;">
+                        <span>📞 ${DATA.contact.phone}</span>
+                        <span>✉️ ${DATA.contact.email}</span>
+                        <span>💬 ${DATA.contact.wechat}</span>
+                        <span>🐧 ${DATA.contact.qq}</span>
+                        <span>📍 ${DATA.contact.address}</span>
+                    </div>
+                </section>`;
+
+                mainContainer.innerHTML = html;
+                document.getElementById('footer').innerHTML = '© 2026 陈东弟 · 信息安全技术应用 · 终端风格';
             }
 
-            function initSlideshow() {
-                const slideshow = document.getElementById('photoSlideshow');
-                if (!slideshow) return;
-                const images = slideshow.querySelectorAll('img');
-                let currentIndex = 0;
-                setInterval(() => {
-                    images[currentIndex].classList.remove('active');
-                    currentIndex = (currentIndex + 1) % images.length;
-                    images[currentIndex].classList.add('active');
-                }, 2000);
-            }
-
-            function initInteractions() {
-                const root = document.documentElement;
-                const themeBtn = document.getElementById('themeToggle');
-                themeBtn.addEventListener('click', () => {
-                    const current = root.getAttribute('data-theme');
-                    root.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
-                    localStorage.setItem('theme', current === 'dark' ? 'light' : 'dark');
-                });
-
-                document.getElementById('printBtn').addEventListener('click', () => window.print());
-
-                function copyText(text, label) {
-                    navigator.clipboard?.writeText(text).then(() => alert(`${label}已复制！`)).catch(() => prompt(`复制失败，请手动复制${label}：`, text));
-                }
-
-                document.getElementById('copyEmail').addEventListener('click', () => copyText(resume.contact.email, '邮箱'));
-                document.getElementById('copyWechat').addEventListener('click', () => copyText(resume.contact.wechat, '微信'));
-                document.getElementById('copyQQ').addEventListener('click', () => copyText(resume.contact.qq, 'QQ'));
-
-                document.getElementById('copyGameLink')?.addEventListener('click', (e) => {
-                    const url = e.currentTarget.dataset.url;
-                    copyText(url, '游戏链接');
-                });
-
-                const backTop = document.getElementById('backTop');
-                window.addEventListener('scroll', () => {
-                    if (window.scrollY > 500) backTop.classList.add('visible');
-                    else backTop.classList.remove('visible');
-                });
-                backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-
-                setupTabs('expTabs');
-                setupTabs('projTabs');
-
-                document.getElementById('playGameBtn')?.addEventListener('click', () => {
-                    document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' });
-                    setTimeout(() => {
-                        const tabs = document.querySelectorAll('#projTabs .tab-btn');
-                        if (tabs.length > 0) {
-                            tabs[0].click();
-                        }
-                    }, 300);
-                });
-
-                document.getElementById('startGameBtn')?.addEventListener('click', () => {
-                    document.getElementById('gameContainer')?.scrollIntoView({ behavior: 'smooth' });
-                });
-
-                document.querySelectorAll('[data-nav]').forEach(a => {
-                    a.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const id = a.getAttribute('href');
-                        document.querySelector(id)?.scrollIntoView({ behavior: 'smooth' });
-                    });
+            // ============================================================
+            //  辅助函数
+            // ============================================================
+            function initCopyButtons() {
+                const map = {
+                    copyEmail: DATA.contact.email,
+                    copyWechat: DATA.contact.wechat,
+                    copyQQ: DATA.contact.qq
+                };
+                Object.keys(map).forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        btn.addEventListener('click', () => {
+                            const text = map[id];
+                            navigator.clipboard?.writeText(text).then(() => {
+                                alert('已复制: ' + text);
+                            }).catch(() => {
+                                prompt('请手动复制:', text);
+                            });
+                        });
+                    }
                 });
             }
 
-            function setupTabs(containerId) {
-                const container = document.getElementById(containerId);
-                if (!container) return;
-                const tabs = container.querySelectorAll('.tab-btn');
-                const panels = container.querySelectorAll('.tab-panel');
+            let scrollFadeTriggered = new Set();
 
-                function activateTab(index) {
-                    tabs.forEach((tab, i) => {
-                        const selected = i === index;
-                        tab.setAttribute('aria-selected', selected);
-                        tab.tabIndex = selected ? 0 : -1;
-                        panels[i].hidden = !selected;
-                    });
-                }
-
-                tabs.forEach((tab, index) => {
-                    tab.addEventListener('click', () => activateTab(index));
-                    tab.addEventListener('keydown', (e) => {
-                        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-                            e.preventDefault();
-                            const total = tabs.length;
-                            let newIndex = index;
-                            if (e.key === 'ArrowRight') newIndex = (index + 1) % total;
-                            if (e.key === 'ArrowLeft') newIndex = (index - 1 + total) % total;
-                            activateTab(newIndex);
-                            tabs[newIndex].focus();
+            function initScrollFade() {
+                const items = document.querySelectorAll('.scroll-fade');
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && !scrollFadeTriggered.has(entry.target)) {
+                            scrollFadeTriggered.add(entry.target);
+                            entry.target.classList.add('visible');
                         }
                     });
+                }, { threshold: 0.15, rootMargin: '0px 0px -30px 0px' });
+                items.forEach(el => observer.observe(el));
+                items.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top < window.innerHeight * 0.85 && !scrollFadeTriggered.has(el)) {
+                        scrollFadeTriggered.add(el);
+                        el.classList.add('visible');
+                    }
                 });
             }
 
-            // BGM 控制
-            const bgm = document.getElementById('bgm');
-            const bgmToggle = document.getElementById('bgmToggle');
-            let isPlaying = false;
+            let skillBarsAnimated = false;
 
-            // 尝试自动播放
-            bgm.volume = 0.5;
-            bgm.play().then(() => {
-                isPlaying = true;
-                bgmToggle.textContent = '🔊';
-                bgmToggle.classList.add('playing');
-            }).catch(() => {
-                isPlaying = false;
-                bgmToggle.textContent = '🔇';
-                bgmToggle.classList.remove('playing');
-            });
-
-            // 如果自动播放被阻止，等待首次点击页面任意位置再播放
-            document.addEventListener('click', function tryPlay() {
-                if (!isPlaying) {
-                    bgm.play().then(() => {
-                        isPlaying = true;
-                        bgmToggle.textContent = '🔊';
-                        bgmToggle.classList.add('playing');
-                    }).catch(() => {
-                        bgmToggle.textContent = '🔇';
-                        bgmToggle.classList.remove('playing');
+            function initSkillBars() {
+                const skillSection = document.getElementById('skills');
+                if (!skillSection) return;
+                const bars = skillSection.querySelectorAll('.progress-fill');
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && !skillBarsAnimated) {
+                            skillBarsAnimated = true;
+                            bars.forEach((bar, i) => {
+                                const parent = bar.closest('.skill-category');
+                                const level = parseInt(parent.dataset.level, 10) || 0;
+                                setTimeout(() => {
+                                    bar.style.width = level + '%';
+                                }, i * 150);
+                            });
+                        }
+                    });
+                }, { threshold: 0.3 });
+                observer.observe(skillSection);
+                const rect = skillSection.getBoundingClientRect();
+                if (rect.top < window.innerHeight * 0.7 && !skillBarsAnimated) {
+                    skillBarsAnimated = true;
+                    bars.forEach((bar, i) => {
+                        const parent = bar.closest('.skill-category');
+                        const level = parseInt(parent.dataset.level, 10) || 0;
+                        setTimeout(() => {
+                            bar.style.width = level + '%';
+                        }, i * 150);
                     });
                 }
-                document.removeEventListener('click', tryPlay);
-            });
+            }
 
-            // 喇叭按钮控制
-            bgmToggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (isPlaying) {
-                    bgm.pause();
-                    isPlaying = false;
-                    bgmToggle.textContent = '🔇';
-                    bgmToggle.classList.remove('playing');
-                } else {
-                    bgm.play().then(() => {
-                        isPlaying = true;
-                        bgmToggle.textContent = '🔊';
-                        bgmToggle.classList.add('playing');
-                    }).catch(() => {
-                        bgmToggle.textContent = '🔇';
-                        bgmToggle.classList.remove('playing');
+            function initNavHighlight() {
+                const sections = [];
+                navLinks.forEach(link => {
+                    const id = link.dataset.nav;
+                    if (id) {
+                        const el = document.getElementById(id);
+                        if (el) sections.push({ link, el });
+                    }
+                });
+
+                function updateActive() {
+                    let currentId = '';
+                    const scrollY = window.scrollY + 100;
+                    sections.forEach(({ link, el }) => {
+                        const top = el.offsetTop;
+                        const height = el.offsetHeight;
+                        if (scrollY >= top && scrollY < top + height) {
+                            currentId = link.dataset.nav;
+                        }
                     });
+                    navLinks.forEach(a => {
+                        a.classList.toggle('active', a.dataset.nav === currentId);
+                    });
+                    if (!currentId) {
+                        const first = document.querySelector('.nav-links a');
+                        if (first) {
+                            navLinks.forEach(a => a.classList.toggle('active', a === first));
+                        }
+                    }
                 }
-            });
+                window.addEventListener('scroll', updateActive);
+                updateActive();
+            }
 
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
+            // ============================================================
+            //  初始化
+            // ============================================================
+            renderMain();
 
-            renderAll();
+            setTimeout(() => {
+                updateDotPositions(0);
+                updateLines();
+            }, 300);
 
-            const now = new Date();
-            footer.innerHTML = `© 2026 陈东弟 · 信息安全技术应用 · 最后更新 ${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}`;
+            console.log('✅ 安全终端已启动，点击屏幕进入');
         })();
     </script>
+
 </body>
 </html>
 ```
