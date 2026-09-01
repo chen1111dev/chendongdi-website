@@ -1,5 +1,3 @@
-这是根据您的要求调整后的HTML文件。我移除了经历板块中的“个人网站搭建”条目，并在项目板块中新增了“个人网站搭建”项目卡片，包含您指定的技术栈和描述。
-```html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -85,7 +83,6 @@
         .container,
         .game-modal,
         #boot-overlay,
-        #intro-overlay,
         #nav-ring-overlay,
         .copy-feedback,
         footer {
@@ -93,18 +90,14 @@
             z-index: 1;
         }
 
-        /* ===== 确保开机终端和过渡页在代码雨之上 ===== */
+        /* ===== 确保开机终端在代码雨之上 ===== */
         #boot-overlay,
-        #intro-overlay,
         #nav-ring-overlay,
         .game-modal {
             z-index: 9997;
         }
         #boot-overlay {
             z-index: 9999;
-        }
-        #intro-overlay {
-            z-index: 9998;
         }
 
         /* ===== 动态命令行状态栏 (顶部) ===== */
@@ -273,54 +266,6 @@
             border-radius: 6px;
             color: var(--accent);
             font-family: var(--font-mono);
-        }
-
-        /* ===== 过渡页 ===== */
-        #intro-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 9998;
-            background: #0a0f1c;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-        #intro-overlay.active {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: none;
-        }
-        #intro-overlay.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .falling-title {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .falling-title span {
-            display: inline-block;
-            font-size: 3.2rem;
-            font-weight: 700;
-            color: var(--accent);
-            text-shadow: 0 0 40px var(--accent-glow);
-            opacity: 0;
-            transform: translateY(-100px) scale(0.5);
-            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .falling-title span.drop {
-            opacity: 1;
-            transform: translateY(0) scale(1);
         }
 
         /* ===== 导航环 ===== */
@@ -1375,6 +1320,16 @@
             font-family: var(--font-mono);
             transition: border-color 0.3s;
         }
+        footer .footer-credit {
+            margin-top: 8px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            opacity: 0.6;
+            letter-spacing: 0.5px;
+        }
+        [data-theme="light"] footer .footer-credit {
+            opacity: 0.7;
+        }
 
         /* ===== 游戏弹窗 ===== */
         .game-modal {
@@ -1495,9 +1450,6 @@
                 width: 80px;
                 height: 80px;
             }
-            .falling-title span {
-                font-size: 2.2rem;
-            }
             #nav-ring-overlay {
                 width: 160px;
                 height: 160px;
@@ -1605,10 +1557,6 @@
             .brand {
                 font-size: 1rem;
             }
-            .falling-title span {
-                font-size: 1.8rem;
-                gap: 4px;
-            }
             #nav-ring-overlay {
                 width: 140px;
                 height: 140px;
@@ -1672,6 +1620,9 @@
             }
             .hero-sub {
                 font-size: 0.9rem !important;
+            }
+            footer .footer-credit {
+                font-size: 0.6rem;
             }
         }
 
@@ -1743,13 +1694,6 @@
         </div>
     </div>
 
-    <!-- ===== 过渡页 ===== -->
-    <div id="intro-overlay">
-        <div class="falling-title" id="fallingTitle">
-            <span>自</span><span>我</span><span>介</span><span>绍</span><span>一</span><span>下</span><span>吧</span>
-        </div>
-    </div>
-
     <!-- ===== 导航环 ===== -->
     <div id="nav-ring-overlay">
         <div class="ring-container" id="ringContainer">
@@ -1803,7 +1747,10 @@
         <!-- 由 JS 动态渲染 -->
     </main>
 
-    <footer id="footer">© 2026 陈东弟 · 信息安全技术应用</footer>
+    <footer id="footer">
+        © 2026 陈东弟 · 信息安全技术应用 · 终端风格
+        <div class="footer-credit">This site is built with AI (DeepSeek) and deployed via Netlify.</div>
+    </footer>
 
     <script>
         (function() {
@@ -1893,7 +1840,7 @@
             drawMatrix();
 
             // ============================================================
-            //  数据 - 移除经历中的个人网站搭建，在项目中添加
+            //  数据 - 拍照作品增加到7张
             // ============================================================
             const DATA = {
                 name: '陈东弟',
@@ -1999,7 +1946,7 @@
                         { name: '看小说', desc: '喜欢阅读各类小说，在文字中体验不同人生。', image: '看小说.jpg', action: 'image' },
                         { name: '看动漫', desc: '热爱动漫文化，喜欢热血与治愈系作品。', image: '看动漫.jpg', action: 'image' }
                     ],
-                    photos: ['13.jpg', '12.jpg', '8.jpg', '10.jpg', '9.jpg', '11.jpg']
+                    photos: ['7.jpg', '8.jpg', '9.jpg', '10.jpg', '11.jpg', '12.jpg', '13.jpg']
                 }
             };
 
@@ -2022,11 +1969,9 @@
             //  DOM 引用 & 全局状态
             // ============================================================
             const bootOverlay = document.getElementById('boot-overlay');
-            const introOverlay = document.getElementById('intro-overlay');
             const navRingOverlay = document.getElementById('nav-ring-overlay');
             const navbar = document.getElementById('navbar');
             const mainContainer = document.getElementById('mainContent');
-            const fallingSpans = document.querySelectorAll('#fallingTitle span');
             const brandHome = document.getElementById('brandHome');
             const ringItems = document.querySelectorAll('.ring-item');
             const ringCenter = document.getElementById('ringCenter');
@@ -2094,45 +2039,36 @@
             }
 
             // ============================================================
-            //  1. 开机终端
+            //  1. 开机终端 - 直接显示，无任何前置内容
             // ============================================================
             function dismissBoot() {
                 if (bootDismissed) return;
                 bootDismissed = true;
                 bootOverlay.classList.add('hidden');
-                introOverlay.classList.add('active');
-                fallingSpans.forEach((span, i) => {
-                    setTimeout(() => {
-                        span.classList.add('drop');
-                    }, 80 * i);
-                });
+                // 直接显示主内容
+                navbar.classList.add('visible');
+                mainContainer.classList.add('visible');
+                cmdStatus.classList.add('visible');
+                toolbar.classList.add('visible');
+                navRingOverlay.classList.add('active');
+                ringActive = true;
                 setTimeout(() => {
-                    introOverlay.classList.remove('active');
-                    introOverlay.classList.add('hidden');
-                    navRingOverlay.classList.add('active');
-                    ringActive = true;
-                    navbar.classList.add('visible');
-                    mainContainer.classList.add('visible');
-                    cmdStatus.classList.add('visible');
-                    toolbar.classList.add('visible');
-                    setTimeout(() => {
-                        initScrollFade();
-                        initShowcase();
-                        initHobbyInteractions();
-                        initCmdStatus();
-                        initHeroTypewriterObserver();
-                        initContactForm();
-                        initGameModal();
-                    }, 200);
-                    initNavHighlight();
-                    initCopyButtons();
-                    initThemeToggle();
-                    initPdfExport();
-                    updateDotPositions(orbitAngle);
-                    updateLines();
-                    startAnimationLoop();
-                    tryAutoPlayBGM();
-                }, 1200);
+                    initScrollFade();
+                    initShowcase();
+                    initHobbyInteractions();
+                    initCmdStatus();
+                    initHeroTypewriterObserver();
+                    initContactForm();
+                    initGameModal();
+                }, 200);
+                initNavHighlight();
+                initCopyButtons();
+                initThemeToggle();
+                initPdfExport();
+                updateDotPositions(orbitAngle);
+                updateLines();
+                startAnimationLoop();
+                tryAutoPlayBGM();
             }
 
             bootOverlay.addEventListener('click', dismissBoot);
@@ -2201,7 +2137,7 @@
             });
 
             // ============================================================
-            //  5. 导航高亮 + 脉冲光点 (修复滚动偏移)
+            //  5. 导航高亮 + 脉冲光点
             // ============================================================
             function initNavHighlight() {
                 const sections = [];
@@ -2328,8 +2264,7 @@
             });
 
             brandHome.addEventListener('click', function() {
-                if (!ringActive && !introOverlay.classList.contains('active') && !bootOverlay.classList.contains(
-                        'active')) {
+                if (!ringActive && !bootOverlay.classList.contains('active')) {
                     navRingOverlay.classList.remove('hidden');
                     navRingOverlay.classList.add('active');
                     ringActive = true;
@@ -2410,7 +2345,7 @@
             }
 
             // ============================================================
-            //  10. 纸飞机展示 + "再看一次"按钮
+            //  10. 纸飞机展示
             // ============================================================
             function initShowcase() {
                 const container = document.getElementById('showcaseContainer');
@@ -2601,7 +2536,7 @@
             }
 
             // ============================================================
-            //  11. 首页打字机效果 (多段文本)
+            //  11. 首页打字机效果
             // ============================================================
             function initHeroTypewriterObserver() {
                 const heroSection = document.getElementById('hero');
@@ -2788,7 +2723,7 @@
             }
 
             // ============================================================
-            //  15. 游戏弹窗 (支持全屏)
+            //  15. 游戏弹窗
             // ============================================================
             function initGameModal() {
                 document.addEventListener('click', function(e) {
@@ -2885,7 +2820,7 @@
             printStyle.textContent = `
                 @media print {
                     #matrixCanvas { display: none !important; }
-                    #cmd-status, #toolbar, #nav-ring-overlay, #boot-overlay, #intro-overlay,
+                    #cmd-status, #toolbar, #nav-ring-overlay, #boot-overlay,
                     .navbar, .copy-feedback, .hobby-action-btn, .showcase-btn,
                     .project-card .expand-icon, .btn, .btn-play, .contact-form .submit-btn,
                     .game-modal {
@@ -2905,6 +2840,7 @@
                     .hobby-item { border: 1px solid #ccc !important; }
                     [data-theme="light"] body { background: #fff !important; }
                     .highlight-item { border-left-color: #006688 !important; }
+                    footer .footer-credit { display: none !important; }
                 }
             `;
             document.head.appendChild(printStyle);
@@ -2959,7 +2895,7 @@
                     </div>
                 </section>`;
 
-                // ===== 项目 (包含个人网站搭建) =====
+                // ===== 项目 =====
                 html += `
                 <section id="projects" class="scroll-fade" style="margin-bottom:48px;">
                     <div class="section-title">🚀 项目</div>
@@ -2992,7 +2928,7 @@
                     }).join('')}
                 </section>`;
 
-                // ===== 经历 (已移除个人网站搭建) =====
+                // ===== 经历 =====
                 html += `
                 <section id="experience" class="scroll-fade" style="margin-bottom:48px;">
                     <div class="section-title">📌 经历</div>
@@ -3149,7 +3085,6 @@
                 </section>`;
 
                 mainContainer.innerHTML = html;
-                document.getElementById('footer').innerHTML = '© 2026 陈东弟 · 信息安全技术应用 · 终端风格';
 
                 document.querySelectorAll('.project-card-detailed .btn-play, .highlight-item .btn-play').forEach(btn => {
                     btn.addEventListener('click', function(e) {
@@ -3199,12 +3134,13 @@
             // ============================================================
             renderMain();
 
+            // 开机终端默认显示，无任何前置内容
             setTimeout(() => {
                 updateDotPositions(0);
                 updateLines();
-            }, 300);
+            }, 100);
 
-            console.log('✅ 安全终端已启动，点击屏幕进入');
+            console.log('✅ 安全终端已启动');
         })();
     </script>
 
