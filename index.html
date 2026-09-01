@@ -1,4 +1,4 @@
-这是根据您的要求修改后的HTML文件。我移除了经历板块中的“个人网站搭建”条目，并在项目板块中新增了“个人网站搭建”项目卡片，包含了您指定的技术栈和描述。
+这是根据您的要求调整后的HTML文件。我移除了经历板块中的“个人网站搭建”条目，并在项目板块中新增了“个人网站搭建”项目卡片，包含您指定的技术栈和描述。
 ```html
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -1468,6 +1468,7 @@
             left: 0;
         }
 
+        /* ===== 响应式优化 ===== */
         @media (max-width: 680px) {
             .nav-inner {
                 padding: 10px 16px;
@@ -1478,6 +1479,11 @@
             }
             .hero-title h1 {
                 font-size: 1.8rem;
+            }
+            .hero-sub {
+                font-size: 0.85rem;
+                white-space: normal;
+                word-break: break-word;
             }
             .container {
                 padding: 12px 16px 100px;
@@ -1579,6 +1585,18 @@
             .project-card-detailed .project-title {
                 font-size: 1.2rem;
             }
+            /* 手机端加大技能和标签字体 */
+            .skill-tag {
+                font-size: 0.85rem !important;
+                padding: 6px 16px !important;
+            }
+            .badge {
+                font-size: 0.8rem !important;
+                padding: 5px 16px !important;
+            }
+            .hero-sub {
+                font-size: 0.95rem !important;
+            }
         }
         @media (max-width: 480px) {
             .nav-links a {
@@ -1642,6 +1660,25 @@
             .project-card-detailed .section-content {
                 font-size: 0.85rem;
                 padding-left: 10px;
+            }
+            /* 手机端加大技能和标签字体 */
+            .skill-tag {
+                font-size: 0.8rem !important;
+                padding: 5px 12px !important;
+            }
+            .badge {
+                font-size: 0.75rem !important;
+                padding: 4px 12px !important;
+            }
+            .hero-sub {
+                font-size: 0.9rem !important;
+            }
+        }
+
+        /* 电脑端标题保持一行 */
+        @media (min-width: 681px) {
+            .hero-sub {
+                white-space: nowrap;
             }
         }
     </style>
@@ -1856,7 +1893,7 @@
             drawMatrix();
 
             // ============================================================
-            //  数据 - 更新经历内容
+            //  数据 - 移除经历中的个人网站搭建，在项目中添加
             // ============================================================
             const DATA = {
                 name: '陈东弟',
@@ -1891,17 +1928,14 @@
                         { label: '能力提升',
                         content: '在不断的调试过程中，加深了对程序运行逻辑的理解，掌握了如何通过精准提问让 AI 修复 Bug，培养了阅读技术文档和独立解决问题的能力。' }
                     ]
-                },
-                {
+                }, {
                     name: '个人网站搭建',
                     tech: ['DeepSeek', 'HTML', 'GitHub', 'Netlify'],
                     sections: [
                         { label: '项目描述', content: '从零开始，利用 AI 辅助编程工具（DeepSeek）生成并迭代网站代码。通过 GitHub 进行版本控制，并配置 Netlify 实现自动化部署。' },
                         { label: '核心收获', content: '跑通了“AI 生成代码 -> GitHub 托管 -> Netlify 自动部署”的完整开发流水线。验证了 AI 辅助开发在快速原型搭建中的高效性。' }
                     ],
-                    playable: false
-                },
-                {
+                    playable: false                }, {
                     name: '待补充：CTF竞赛 / 安全实践',
                     tech: ['信息安全', 'CTF', '渗透测试'],
                     summary: '大学期间计划参与的项目',
@@ -1916,7 +1950,6 @@
                     link: '#',
                     placeholder: true
                 }],
-                // 更新经历：移除个人网站搭建
                 experience: [{
                     tab: '教育',
                     period: '2026年9月 - 至今',
@@ -1966,7 +1999,7 @@
                         { name: '看小说', desc: '喜欢阅读各类小说，在文字中体验不同人生。', image: '看小说.jpg', action: 'image' },
                         { name: '看动漫', desc: '热爱动漫文化，喜欢热血与治愈系作品。', image: '看动漫.jpg', action: 'image' }
                     ],
-                    photos: ['7.jpg', '12.jpg', '8.jpg', '10.jpg', '9.jpg', '11.jpg']
+                    photos: ['13.jpg', '12.jpg', '8.jpg', '10.jpg', '9.jpg', '11.jpg']
                 }
             };
 
@@ -2877,7 +2910,7 @@
             document.head.appendChild(printStyle);
 
             // ============================================================
-            //  16. 渲染主内容 (经历已更新)
+            //  16. 渲染主内容
             // ============================================================
             function renderMain() {
                 let html = '';
@@ -2926,7 +2959,7 @@
                     </div>
                 </section>`;
 
-                // ===== 项目 =====
+                // ===== 项目 (包含个人网站搭建) =====
                 html += `
                 <section id="projects" class="scroll-fade" style="margin-bottom:48px;">
                     <div class="section-title">🚀 项目</div>
@@ -3118,7 +3151,6 @@
                 mainContainer.innerHTML = html;
                 document.getElementById('footer').innerHTML = '© 2026 陈东弟 · 信息安全技术应用 · 终端风格';
 
-                // 重新绑定项目中的"玩一玩"按钮 (事件委托)
                 document.querySelectorAll('.project-card-detailed .btn-play, .highlight-item .btn-play').forEach(btn => {
                     btn.addEventListener('click', function(e) {
                         e.stopPropagation();
@@ -3127,9 +3159,6 @@
                     });
                 });
             }
-
-            // 暴露 openGameModal 给全局
-            let openGameModalFn = null;
 
             function openGameModal(url) {
                 if (gameModal) {
