@@ -1,3 +1,4 @@
+这是根据您的要求修改后的HTML文件。我移除了经历板块中的“个人网站搭建”条目，并在项目板块中新增了“个人网站搭建”项目卡片，包含了您指定的技术栈和描述。
 ```html
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -6,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>陈东弟 · 安全终端</title>
     <style>
+        /* ===== 全局重置 & 深色科技风变量 ===== */
         * {
             margin: 0;
             padding: 0;
@@ -21,17 +23,31 @@
             --text-dim: #7f95ad;
             --accent: #66fcf1;
             --accent2: #45a29e;
-            --accent-glow: rgba(102, 252, 241, 0.12);
+            --accent-glow: rgba(102, 252, 241, 0.15);
             --badge-bg: #1b2a38;
             --radius: 12px;
             --shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
             --font-mono: 'Courier New', 'Consolas', 'Fira Code', 'JetBrains Mono', monospace;
-            --transition: 0.25s ease;
+            --transition: 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        [data-theme="light"] {
+            --bg: #f0f4f8;
+            --bg-card: #ffffff;
+            --bg-card-hover: #e8edf4;
+            --border: #c0d0e0;
+            --text: #1a2a3a;
+            --text-dim: #5a6e7e;
+            --accent: #0088aa;
+            --accent2: #006688;
+            --accent-glow: rgba(0, 136, 170, 0.15);
+            --badge-bg: #dce6f0;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
         }
 
         html {
             scroll-behavior: smooth;
-            scroll-padding-top: 80px;
+            scroll-padding-top: 110px;
         }
 
         body {
@@ -41,20 +57,150 @@
             line-height: 1.7;
             min-height: 100vh;
             padding-top: 72px;
-            background-image:
-                linear-gradient(rgba(102, 252, 241, 0.025) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(102, 252, 241, 0.025) 1px, transparent 1px);
-            background-size: 48px 48px;
             overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+            position: relative;
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-            background: var(--bg);
+        /* ===== 代码雨背景 Canvas ===== */
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.25;
+            transition: opacity 0.5s ease;
         }
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent2);
+        [data-theme="light"] #matrixCanvas {
+            opacity: 0.08;
+        }
+
+        /* ===== 让所有内容在代码雨上层 ===== */
+        .navbar,
+        #cmd-status,
+        #toolbar,
+        .container,
+        .game-modal,
+        #boot-overlay,
+        #intro-overlay,
+        #nav-ring-overlay,
+        .copy-feedback,
+        footer {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== 确保开机终端和过渡页在代码雨之上 ===== */
+        #boot-overlay,
+        #intro-overlay,
+        #nav-ring-overlay,
+        .game-modal {
+            z-index: 9997;
+        }
+        #boot-overlay {
+            z-index: 9999;
+        }
+        #intro-overlay {
+            z-index: 9998;
+        }
+
+        /* ===== 动态命令行状态栏 (顶部) ===== */
+        #cmd-status {
+            position: fixed;
+            top: 72px;
+            left: 0;
+            right: 0;
+            z-index: 99;
+            background: rgba(11, 12, 16, 0.85);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border);
+            padding: 6px 24px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s;
+            opacity: 0;
+            transform: translateY(-8px);
+            pointer-events: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        [data-theme="light"] #cmd-status {
+            background: rgba(240, 244, 248, 0.92);
+        }
+        #cmd-status.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: none;
+        }
+        #cmd-status .prompt {
+            color: var(--accent2);
+            font-weight: 600;
+        }
+        #cmd-status .cmd-text {
+            color: var(--text);
+            letter-spacing: 0.5px;
+        }
+        #cmd-status .cursor-blink {
+            display: inline-block;
+            width: 8px;
+            height: 1.1em;
+            background: var(--accent);
+            margin-left: 2px;
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+        }
+        #cmd-status .status-tag {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            background: var(--badge-bg);
+            padding: 2px 12px;
             border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        /* ===== 右上角工具栏 ===== */
+        #toolbar {
+            position: fixed;
+            top: 72px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        #toolbar.visible {
+            opacity: 1;
+        }
+        .toolbar-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .toolbar-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 16px var(--accent-glow);
+        }
+        .toolbar-btn .icon {
+            font-size: 1rem;
         }
 
         /* ===== 开机终端 ===== */
@@ -343,8 +489,11 @@
             z-index: 100;
             font-family: var(--font-mono);
             opacity: 0;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.5s ease, background 0.3s;
             pointer-events: none;
+        }
+        [data-theme="light"] .navbar {
+            background: rgba(240, 244, 248, 0.92);
         }
         .navbar.visible {
             opacity: 1;
@@ -386,13 +535,57 @@
             padding-bottom: 4px;
             border-bottom: 2px solid transparent;
             cursor: pointer;
+            position: relative;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s var(--transition), left 0.3s var(--transition);
+            box-shadow: 0 0 8px var(--accent-glow);
+            border-radius: 2px;
         }
         .nav-links a:hover {
             color: var(--accent);
         }
         .nav-links a.active {
             color: var(--accent);
-            border-bottom-color: var(--accent);
+            border-bottom-color: transparent;
+        }
+        .nav-links a.active::after {
+            width: 100%;
+            left: 0;
+        }
+        .nav-links a .pulse-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            margin-left: 4px;
+            box-shadow: 0 0 8px var(--accent-glow);
+            opacity: 0;
+            transition: opacity 0.3s var(--transition);
+            vertical-align: middle;
+        }
+        .nav-links a.active .pulse-dot {
+            opacity: 1;
+            animation: pulse-dot 1.8s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.6);
+                opacity: 0.2;
+            }
         }
 
         /* ===== 主容器 ===== */
@@ -415,7 +608,7 @@
             border-radius: var(--radius);
             padding: 24px;
             box-shadow: var(--shadow);
-            transition: transform 0.2s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            transition: transform 0.2s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.3s;
         }
         .card:hover {
             border-color: var(--accent);
@@ -502,166 +695,348 @@
             margin-top: 12px;
             min-height: 2.2em;
         }
+        .hero-desc-wrap .typing-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.1em;
+            background: var(--accent);
+            margin-left: 2px;
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+        }
 
+        /* ===== 黑客风标签容器 (首页 Slogan 正下方) ===== */
         .badge-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 12px;
+            justify-content: flex-start;
+            gap: 12px;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            padding-left: 0;
         }
         .badge {
-            background: var(--badge-bg);
-            border: 1px solid var(--border);
-            padding: 4px 16px;
-            border-radius: 30px;
-            font-size: 0.8rem;
+            background: #0a0e14;
+            border: 1px solid #2a4a3a;
+            color: #88f0d0;
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.85rem;
             font-weight: 500;
-            color: var(--accent2);
             font-family: var(--font-mono);
-            transition: all 0.2s;
+            letter-spacing: 0.8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 12px rgba(102, 252, 241, 0.06);
+            text-shadow: 0 0 8px rgba(102, 252, 241, 0.2);
+            cursor: default;
+            white-space: nowrap;
         }
         .badge:hover {
             border-color: var(--accent);
-            box-shadow: 0 0 14px var(--accent-glow);
+            color: var(--accent);
+            transform: scale(1.06);
+            box-shadow: 0 0 28px rgba(102, 252, 241, 0.25), inset 0 0 20px rgba(102, 252, 241, 0.05);
+            text-shadow: 0 0 16px rgba(102, 252, 241, 0.4);
+        }
+        [data-theme="light"] .badge {
+            background: #e8eef4;
+            border-color: #88aac0;
+            color: #006688;
+            text-shadow: 0 0 4px rgba(0, 136, 170, 0.1);
+        }
+        [data-theme="light"] .badge:hover {
+            border-color: var(--accent);
+            color: var(--accent2);
+            box-shadow: 0 0 28px rgba(0, 136, 170, 0.2);
         }
 
-        .btn {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 8px 18px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: var(--font-mono);
-            text-decoration: none;
+        /* ============================================================
+           技能胶囊 - 硬核风格 (小圆角/直角 + 边框 + 前缀)
+           ============================================================ */
+        .skill-tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        /* 所有技能标签共用基础样式 */
+        .skill-tag {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            padding: 8px 18px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            font-family: var(--font-mono);
+            letter-spacing: 0.5px;
+            background: transparent;
+            border: 1px solid var(--border);
+            /* 默认占位，会被覆盖 */
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            cursor: default;
+            white-space: nowrap;
+            box-shadow: 0 0 12px rgba(102, 252, 241, 0.04);
         }
-        .btn-primary {
+        .skill-tag:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 24px var(--accent-glow);
+        }
+
+        /* 硬技能 - 亮青色边框 + 透明背景，前缀 > */
+        .skill-tag-hard {
+            border-color: #66fcf1;
+            color: #88f0d0;
+            border-radius: 3px;
+            /* 或者只保留左上和右下圆角: border-radius: 3px 0 3px 0; */
+            background: rgba(102, 252, 241, 0.05);
+        }
+        .skill-tag-hard:hover {
+            border-color: #66fcf1;
+            color: #66fcf1;
+            box-shadow: 0 0 28px rgba(102, 252, 241, 0.2);
+            background: rgba(102, 252, 241, 0.08);
+        }
+        .skill-tag-hard .prefix {
+            color: #66fcf1;
+            font-weight: 700;
+            opacity: 0.8;
+        }
+
+        /* 软技能 - 淡黄色边框 + 透明背景，前缀 + */
+        .skill-tag-soft {
+            border-color: #d4b87a;
+            color: #d4b87a;
+            border-radius: 0 3px 0 3px;
+            /* 对角圆角，更硬核 */
+            background: rgba(212, 184, 122, 0.05);
+        }
+        .skill-tag-soft:hover {
+            border-color: #e8d5a8;
+            color: #e8d5a8;
+            box-shadow: 0 0 28px rgba(212, 184, 122, 0.15);
+            background: rgba(212, 184, 122, 0.08);
+        }
+        .skill-tag-soft .prefix {
+            color: #d4b87a;
+            font-weight: 700;
+            opacity: 0.8;
+        }
+
+        /* 前缀符号 */
+        .skill-tag .prefix {
+            margin-right: 2px;
+        }
+
+        .skill-group-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: var(--font-mono);
+            margin-top: 12px;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .skill-group-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            opacity: 0.3;
+        }
+        .skill-group-title:first-of-type {
+            margin-top: 0;
+        }
+
+        /* ===== 响应式: 小屏幕自动换行 ===== */
+        @media (max-width: 680px) {
+            .badge {
+                font-size: 0.7rem;
+                padding: 4px 14px;
+                gap: 8px;
+            }
+            .badge-row {
+                gap: 8px;
+                margin-top: 12px;
+            }
+            .hero-desc-wrap {
+                max-width: 100%;
+            }
+            .skill-tag {
+                font-size: 0.75rem;
+                padding: 5px 14px;
+            }
+            .skill-tag-container {
+                gap: 8px;
+            }
+        }
+        @media (max-width: 480px) {
+            .badge {
+                font-size: 0.6rem;
+                padding: 3px 10px;
+            }
+            .badge-row {
+                gap: 6px;
+            }
+            .skill-tag {
+                font-size: 0.65rem;
+                padding: 4px 10px;
+                gap: 4px;
+            }
+            .skill-tag-container {
+                gap: 6px;
+            }
+        }
+
+        /* ===== 项目卡片 - 新版详细样式 ===== */
+        .project-card-detailed {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: all 0.25s var(--transition);
+        }
+        .project-card-detailed:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-glow);
+            transform: translateY(-3px);
+        }
+        .project-card-detailed .project-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: var(--font-mono);
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+        .project-card-detailed .section-label {
+            color: var(--accent2);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 14px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+        }
+        .project-card-detailed .section-label::before {
+            content: '>';
+            color: var(--accent);
+            font-weight: 700;
+        }
+        .project-card-detailed .section-content {
+            color: var(--text);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            padding-left: 12px;
+            border-left: 2px solid var(--border);
+            padding-left: 16px;
+        }
+        .project-card-detailed .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .project-card-detailed .tech-tags .tech-tag {
+            background: var(--badge-bg);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            padding: 3px 14px;
+            border-radius: 20px;
+            color: var(--accent2);
+            border: 1px solid var(--border);
+        }
+        .project-card-detailed .btn-play {
             background: var(--accent);
             color: #0b0c10;
-            border-color: var(--accent);
+            border: none;
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+            display: inline-block;
         }
-        .btn-primary:hover {
+        .project-card-detailed .btn-play:hover {
             background: var(--accent2);
-            border-color: var(--accent2);
             box-shadow: 0 0 20px var(--accent-glow);
-        }
-        .btn-outline:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        .btn:active {
-            transform: scale(0.94);
+            transform: scale(1.03);
         }
 
-        .skill-category {
-            margin-bottom: 18px;
-        }
-        .skill-label {
-            display: flex;
-            justify-content: space-between;
-            font-weight: 600;
-            margin-bottom: 4px;
-            font-size: 0.9rem;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: var(--border);
-            border-radius: 20px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent), var(--accent2));
-            border-radius: 20px;
-            width: 0%;
-            transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .project-card {
+        /* ===== 其他项目占位 ===== */
+        .project-placeholder {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 20px;
-            transition: all 0.25s ease;
+            transition: all 0.25s var(--transition);
+            text-align: center;
+            color: var(--text-dim);
         }
-        .project-card:hover {
+        .project-placeholder:hover {
             border-color: var(--accent);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-glow);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
         }
-        .tech-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin: 8px 0;
+        .project-placeholder .placeholder-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
         }
-        .tech-tag {
-            background: var(--badge-bg);
+        .project-placeholder .placeholder-title {
+            font-weight: 600;
+            color: var(--text);
             font-family: var(--font-mono);
-            font-size: 0.7rem;
-            padding: 2px 12px;
-            border-radius: 20px;
-            color: var(--accent2);
-            border: 1px solid var(--border);
+        }
+        .project-placeholder .placeholder-desc {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-top: 4px;
         }
 
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-        }
-        .highlight-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-        }
-        .highlight-item {
+        /* ===== 复制反馈强化 ===== */
+        .copy-feedback {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
             background: var(--bg-card);
-            border-left: 4px solid var(--accent);
-            padding: 16px 18px;
-            border-radius: 10px;
-            transition: 0.2s;
-        }
-        .highlight-item:hover {
-            background: var(--bg-card-hover);
-            border-left-color: var(--accent2);
-        }
-        .highlight-number {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--accent);
-            font-family: var(--font-mono);
-        }
-
-        .photo-placeholder {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background: var(--badge-bg);
-            border: 1px solid var(--border);
+            border: 1px solid var(--accent);
             border-radius: 8px;
-            overflow: hidden;
-            transition: filter 0.3s ease, transform 0.3s ease;
-            filter: grayscale(0.7) contrast(0.85);
+            padding: 10px 24px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 30px var(--accent-glow);
+            opacity: 0;
+            transition: opacity 0.4s var(--transition), transform 0.4s var(--transition);
+            pointer-events: none;
+            z-index: 200;
+            backdrop-filter: blur(4px);
         }
-        .photo-placeholder:hover {
-            filter: grayscale(0) contrast(1);
-            transform: scale(1.02);
+        .copy-feedback.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
-        .photo-placeholder img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
+        .copy-feedback .prefix {
+            color: var(--text-dim);
+        }
+        .copy-feedback .highlight {
+            color: var(--accent);
+            font-weight: 600;
         }
 
-        /* ===== 爱好 - 纸飞机展示 ===== */
+        /* ===== 爱好板块 ===== */
         .hobby-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -675,6 +1050,7 @@
             padding: 16px;
             text-align: center;
             transition: all 0.3s;
+            cursor: pointer;
         }
         .hobby-item:hover {
             border-color: var(--accent);
@@ -690,7 +1066,54 @@
             color: var(--text-dim);
             font-size: 0.85rem;
         }
+        .hobby-item .hobby-action-btn {
+            margin-top: 10px;
+            padding: 4px 16px;
+            border: 1px solid var(--accent2);
+            border-radius: 20px;
+            background: transparent;
+            color: var(--accent2);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .hobby-item .hobby-action-btn:hover {
+            background: var(--accent);
+            color: #0b0c10;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .hobby-item .hobby-image {
+            margin-top: 12px;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            display: none;
+        }
+        .hobby-item .hobby-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .hobby-item .hobby-image.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
 
+        /* ===== 拍照作品展示 ===== */
         .showcase-container {
             position: relative;
             width: 100%;
@@ -771,6 +1194,177 @@
             transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        .highlight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .highlight-item {
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent);
+            padding: 16px 18px;
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+        .highlight-item:hover {
+            background: var(--bg-card-hover);
+            border-left-color: var(--accent2);
+        }
+        .highlight-number {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: var(--font-mono);
+        }
+
+        .photo-placeholder {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: var(--badge-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: filter 0.3s ease, transform 0.3s ease;
+            filter: grayscale(0.7) contrast(0.85);
+        }
+        .photo-placeholder:hover {
+            filter: grayscale(0) contrast(1);
+            transform: scale(1.02);
+        }
+        .photo-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* ===== 联系板块 - 左右布局 ===== */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .contact-info .contact-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: var(--font-mono);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .contact-info .contact-sub {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            border-left: 2px solid var(--accent2);
+            padding-left: 12px;
+        }
+        .contact-info .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        .contact-info .info-item .icon {
+            color: var(--accent2);
+            width: 28px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        .contact-info .info-item .label {
+            color: var(--text-dim);
+            min-width: 36px;
+            font-size: 0.8rem;
+        }
+        .contact-info .info-item .value {
+            color: var(--text);
+            word-break: break-all;
+        }
+
+        .contact-form-section {
+            border-left: 1px solid var(--border);
+            padding-left: 30px;
+        }
+        .contact-form-section .form-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 16px;
+            font-family: var(--font-mono);
+            letter-spacing: 1px;
+        }
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .contact-form .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .contact-form .form-group label {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+            letter-spacing: 0.5px;
+        }
+        .contact-form .form-group input,
+        .contact-form .form-group textarea {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+            outline: none;
+        }
+        .contact-form .form-group input:focus,
+        .contact-form .form-group textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .contact-form .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .contact-form .submit-btn {
+            align-self: flex-start;
+            padding: 10px 32px;
+            background: var(--accent);
+            color: #0b0c10;
+            border: none;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .contact-form .submit-btn:hover {
+            background: var(--accent2);
+            box-shadow: 0 0 40px var(--accent-glow);
+            transform: scale(1.02);
+        }
+        .contact-form .submit-btn:active {
+            transform: scale(0.95);
+        }
+
         footer {
             border-top: 1px solid var(--border);
             padding: 24px;
@@ -779,37 +1373,323 @@
             font-size: 0.8rem;
             margin-top: 40px;
             font-family: var(--font-mono);
+            transition: border-color 0.3s;
+        }
+
+        /* ===== 游戏弹窗 ===== */
+        .game-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-modal.active {
+            display: flex;
+        }
+        .game-modal .modal-content {
+            background: var(--bg-card);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 20px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            box-shadow: 0 0 60px var(--accent-glow);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .game-modal .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+        .game-modal .modal-title {
+            color: var(--accent);
+            font-size: 1.2rem;
+            font-family: var(--font-mono);
+        }
+        .game-modal .modal-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .game-modal .modal-controls button {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .game-modal .modal-controls button:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .game-modal .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+            font-family: var(--font-mono);
+            padding: 0 6px;
+        }
+        .game-modal .modal-close:hover {
+            color: var(--accent);
+        }
+        .game-modal .game-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 400px;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .game-modal .game-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         @media (max-width: 680px) {
-            .nav-inner { padding: 10px 16px; }
-            .nav-links { gap: 10px; font-size: 0.75rem; }
-            .hero-title h1 { font-size: 1.8rem; }
-            .container { padding: 12px 16px 100px; }
-            .terminal-window { padding: 20px 18px 24px; }
-            .avatar-main { width: 80px; height: 80px; }
-            .falling-title span { font-size: 2.2rem; }
-            #nav-ring-overlay { width: 160px; height: 160px; bottom: 16px; right: 16px; }
-            .ring-center { width: 64px; height: 64px; font-size: 0.9rem; }
-            .ring-item { width: 36px; height: 36px; font-size: 0.5rem; }
-            .hobby-grid { grid-template-columns: 1fr; }
-            .showcase-container { aspect-ratio: 4 / 3; }
-            .showcase-images img.flying { width: 100px; height: 75px; }
-            .showcase-images img.show { width: 320px; height: 240px; }
+            .nav-inner {
+                padding: 10px 16px;
+            }
+            .nav-links {
+                gap: 10px;
+                font-size: 0.75rem;
+            }
+            .hero-title h1 {
+                font-size: 1.8rem;
+            }
+            .container {
+                padding: 12px 16px 100px;
+            }
+            .terminal-window {
+                padding: 20px 18px 24px;
+            }
+            .avatar-main {
+                width: 80px;
+                height: 80px;
+            }
+            .falling-title span {
+                font-size: 2.2rem;
+            }
+            #nav-ring-overlay {
+                width: 160px;
+                height: 160px;
+                bottom: 16px;
+                right: 16px;
+            }
+            .ring-center {
+                width: 64px;
+                height: 64px;
+                font-size: 0.9rem;
+            }
+            .ring-item {
+                width: 36px;
+                height: 36px;
+                font-size: 0.5rem;
+            }
+            .hobby-grid {
+                grid-template-columns: 1fr;
+            }
+            .showcase-container {
+                aspect-ratio: 4 / 3;
+            }
+            .showcase-images img.flying {
+                width: 100px;
+                height: 75px;
+            }
+            .showcase-images img.show {
+                width: 320px;
+                height: 240px;
+            }
+            #cmd-status {
+                font-size: 0.75rem;
+                padding: 4px 16px;
+                top: 60px;
+            }
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .contact-form-section {
+                border-left: none;
+                padding-left: 0;
+                border-top: 1px solid var(--border);
+                padding-top: 20px;
+            }
+            .contact-info .info-item {
+                font-size: 0.8rem;
+                flex-wrap: wrap;
+            }
+            #toolbar {
+                top: 60px;
+                right: 12px;
+                gap: 4px;
+            }
+            .toolbar-btn {
+                padding: 4px 8px;
+                font-size: 0.65rem;
+            }
+            .toolbar-btn .icon {
+                font-size: 0.8rem;
+            }
+            .game-modal .game-wrapper {
+                min-height: 280px;
+            }
+            .badge-row {
+                gap: 8px;
+            }
+            .badge {
+                font-size: 0.7rem;
+                padding: 4px 14px;
+            }
+            .hero-desc-wrap {
+                max-width: 100%;
+            }
+            .skill-tag {
+                font-size: 0.75rem;
+                padding: 5px 14px;
+            }
+            .skill-tag-container {
+                gap: 8px;
+            }
+            .project-card-detailed {
+                padding: 18px;
+            }
+            .project-card-detailed .project-title {
+                font-size: 1.2rem;
+            }
         }
         @media (max-width: 480px) {
-            .nav-links a { font-size: 0.7rem; }
-            .brand { font-size: 1rem; }
-            .falling-title span { font-size: 1.8rem; gap: 4px; }
-            #nav-ring-overlay { width: 140px; height: 140px; bottom: 12px; right: 12px; }
-            .ring-center { width: 56px; height: 56px; font-size: 0.8rem; }
-            .ring-item { width: 32px; height: 32px; font-size: 0.45rem; }
-            .showcase-images img.flying { width: 70px; height: 52px; }
-            .showcase-images img.show { width: 240px; height: 180px; }
+            .nav-links a {
+                font-size: 0.7rem;
+            }
+            .brand {
+                font-size: 1rem;
+            }
+            .falling-title span {
+                font-size: 1.8rem;
+                gap: 4px;
+            }
+            #nav-ring-overlay {
+                width: 140px;
+                height: 140px;
+                bottom: 12px;
+                right: 12px;
+            }
+            .ring-center {
+                width: 56px;
+                height: 56px;
+                font-size: 0.8rem;
+            }
+            .ring-item {
+                width: 32px;
+                height: 32px;
+                font-size: 0.45rem;
+            }
+            .showcase-images img.flying {
+                width: 70px;
+                height: 52px;
+            }
+            .showcase-images img.show {
+                width: 240px;
+                height: 180px;
+            }
+            .game-modal .game-wrapper {
+                min-height: 200px;
+            }
+            .badge {
+                font-size: 0.6rem;
+                padding: 3px 10px;
+            }
+            .badge-row {
+                gap: 6px;
+            }
+            .skill-tag {
+                font-size: 0.65rem;
+                padding: 4px 10px;
+                gap: 4px;
+            }
+            .skill-tag-container {
+                gap: 6px;
+            }
+            .project-card-detailed {
+                padding: 14px;
+            }
+            .project-card-detailed .project-title {
+                font-size: 1rem;
+            }
+            .project-card-detailed .section-content {
+                font-size: 0.85rem;
+                padding-left: 10px;
+            }
         }
     </style>
 </head>
 <body>
+
+    <!-- ===== 代码雨 Canvas ===== -->
+    <canvas id="matrixCanvas"></canvas>
+
+    <!-- ===== 音频 BGM ===== -->
+    <audio id="bgmAudio" loop preload="auto">
+        <source src="个人BGM.mp4" type="audio/mp4" />
+        您的浏览器不支持音频播放。
+    </audio>
+
+    <!-- ===== 动态命令行状态栏 (顶部) ===== -->
+    <div id="cmd-status">
+        <span class="prompt">$</span>
+        <span class="cmd-text" id="cmdText">cd ~</span>
+        <span class="cursor-blink"></span>
+        <span class="status-tag" id="statusTag">READY</span>
+    </div>
+
+    <!-- ===== 右上角工具栏 ===== -->
+    <div id="toolbar">
+        <button class="toolbar-btn" id="themeToggle" title="切换深色/浅色模式">
+            <span class="icon">🌓</span> <span id="themeLabel">深色</span>
+        </button>
+        <button class="toolbar-btn" id="pdfExport" title="保存为PDF">
+            <span class="icon">📄</span> PDF
+        </button>
+    </div>
+
+    <!-- ===== 游戏弹窗 ===== -->
+    <div class="game-modal" id="gameModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">🎮 飞机大战</span>
+                <div class="modal-controls">
+                    <button id="gameFullscreenBtn">⛶ 全屏</button>
+                    <button class="modal-close" id="gameModalClose">✕</button>
+                </div>
+            </div>
+            <div class="game-wrapper" id="gameWrapper">
+                <iframe id="gameIframe" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
 
     <!-- ===== 开机终端 ===== -->
     <div id="boot-overlay">
@@ -863,18 +1743,23 @@
         <div class="nav-inner">
             <div class="brand" id="brandHome">cdd@sec:~$</div>
             <div class="nav-links" id="navLinks">
-                <a class="active" data-nav="hero">首页</a>
-                <a data-nav="skills">技能</a>
-                <a data-nav="projects">项目</a>
-                <a data-nav="experience">经历</a>
-                <a data-nav="certificates">证书</a>
-                <a data-nav="highlights">亮点</a>
-                <a data-nav="selfeval">自我评价</a>
-                <a data-nav="hobby">爱好</a>
-                <a data-nav="contact">联系</a>
+                <a class="active" data-nav="hero">首页 <span class="pulse-dot"></span></a>
+                <a data-nav="skills">技能 <span class="pulse-dot"></span></a>
+                <a data-nav="projects">项目 <span class="pulse-dot"></span></a>
+                <a data-nav="experience">经历 <span class="pulse-dot"></span></a>
+                <a data-nav="certificates">证书 <span class="pulse-dot"></span></a>
+                <a data-nav="highlights">亮点 <span class="pulse-dot"></span></a>
+                <a data-nav="selfeval">自我评价 <span class="pulse-dot"></span></a>
+                <a data-nav="hobby">爱好 <span class="pulse-dot"></span></a>
+                <a data-nav="contact">联系 <span class="pulse-dot"></span></a>
             </div>
         </div>
     </nav>
+
+    <!-- ===== 复制反馈浮层 ===== -->
+    <div class="copy-feedback" id="copyFeedback">
+        <span class="prefix">[INFO]</span> <span class="highlight" id="copyFeedbackText">已复制</span>
+    </div>
 
     <!-- ===== 主内容 ===== -->
     <main class="container" id="mainContent">
@@ -888,11 +1773,94 @@
             'use strict';
 
             // ============================================================
-            //  数据
+            //  代码雨 - 优化版 (二进制 + 随机速度 + 渐隐)
+            // ============================================================
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let w, h;
+            const chars = ['0', '1'];
+            const charArray = chars;
+            const fontSizeOptions = [14, 16, 20];
+            const fontSize = fontSizeOptions[Math.floor(Math.random() * fontSizeOptions.length)];
+            let columns;
+            let drops = [];
+            let dropData = [];
+
+            function resizeCanvas() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+                columns = Math.floor(w / fontSize);
+                drops = [];
+                dropData = [];
+                for (let i = 0; i < columns; i++) {
+                    drops[i] = Math.random() * -100;
+                    dropData[i] = {
+                        speed: 0.5 + Math.random() * 1.8,
+                        brightness: 0.6 + Math.random() * 0.4,
+                        charIndex: Math.floor(Math.random() * charArray.length)
+                    };
+                }
+            }
+
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(11, 12, 16, 0.035)';
+                ctx.fillRect(0, 0, w, h);
+
+                const color1 = '#66fcf1';
+                const color2 = '#45a29e';
+
+                ctx.font = fontSize + 'px monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const charIdx = Math.floor(Math.random() * charArray.length);
+                    const text = charArray[charIdx];
+
+                    const useColor = Math.random() > 0.5 ? color1 : color2;
+                    const yPos = drops[i] * fontSize;
+                    const fadeFactor = Math.min(1, (h - yPos) / (h * 0.3));
+                    const brightness = Math.max(0.05, fadeFactor * 0.9 + 0.1);
+
+                    ctx.fillStyle = useColor;
+                    ctx.shadowColor = useColor;
+                    ctx.shadowBlur = 4;
+
+                    const alpha = Math.min(0.9, brightness * 0.9);
+                    ctx.globalAlpha = alpha;
+
+                    const x = i * fontSize + fontSize / 2;
+                    const y = yPos;
+                    ctx.fillText(text, x, y);
+
+                    ctx.globalAlpha = 1;
+
+                    const speed = dropData[i] ? dropData[i].speed : 1.0;
+                    drops[i] += speed * 0.6;
+
+                    if (y > h && Math.random() > 0.97) {
+                        drops[i] = 0;
+                        dropData[i] = {
+                            speed: 0.5 + Math.random() * 1.8,
+                            brightness: 0.6 + Math.random() * 0.4,
+                            charIndex: Math.floor(Math.random() * charArray.length)
+                        };
+                    }
+                }
+                requestAnimationFrame(drawMatrix);
+            }
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            drawMatrix();
+
+            // ============================================================
+            //  数据 - 更新经历内容
             // ============================================================
             const DATA = {
                 name: '陈东弟',
-                title: '信息安全技术应用 · 大一新生',
+                title: '达摩院 AI 训练师双认证持有者 | AI 辅助开发实战派',
                 contact: {
                     phone: '13413674726',
                     email: '3093264770@qq.com',
@@ -901,34 +1869,54 @@
                     address: '广东佛山 · 广东轻工职业技术大学（佛山校区）'
                 },
                 hero: {
-                    intro: '我是陈东弟，一名广东轻工职业技术大学攻读信息安全技术应用专业的大一新生。高中毕业后没有停下脚步，利用暑假考取达摩院智能客服人工智能训练师（初级、高级），并自学Python与计算机网络基础。对网络安全与AI交叉领域充满热情，计划在安全自动化开发与大模型安全评测方向持续深耕。',
-                    badges: ['智能客服AI训练师', 'OWASP Top 10 基础', 'Python入门', 'PPT展示', '网络安全意识', 'NLP兴趣'],
+                    intro: '我是陈东弟，广东轻工职业技术大学信息安全技术应用专业 2026 级新生。\n\n高中毕业后的暑假，我没有选择躺平，而是主动探索了两个方向：一是系统学习并考取了达摩院 AI 训练师（初级、高级）双认证，掌握了语料标注与模型评估的核心技能；二是拥抱 AI 辅助编程，利用 Trae Code 等工具，通过不断调试与优化，独立完成了“飞机大战”小游戏的开发。\n\n我深知自己目前的技术栈还很基础，但我对新技术保持极高的敏感度，有清晰的大学规划，更有极强的自驱力。我渴望在大学期间加入专业的竞赛团队或实验室，在实战中打磨技术，为学校和集体争取荣誉。 如果你也是信息安全方向的同路人，欢迎随时交流。',
+                    badges: ['达摩院AI双认证', 'AI辅助开发实战', '信安专业准大一', 'CTF备赛方向', '安全自动化开发', '大模型安全评测'],
                     avatar: 'logo.jpg'
                 },
-                skills: [
-                    { category: '办公软件', label: 'PPT制作与展示', level: 70 },
-                    { category: '语言能力', label: '英语技术文档阅读', level: 70 },
-                    { category: 'AI训练', label: '智能客服语料标注', level: 20 },
-                    { category: '安全基础', label: 'OWASP Top 10 认知', level: 10 },
-                    { category: '编程', label: 'Python基础', level: 10 }
-                ],
+                skills: {
+                    hard: ['大模型数据编程', 'AI辅助开发', 'Web安全认知', '信息检索与文档'],
+                    soft: ['极强的自驱力', '目标清晰', '沟通与协作', '抗压与耐心']
+                },
                 projects: [{
-                    name: '飞机大战小游戏开发',
-                    tech: ['Python', 'Trae Code', 'Pygame'],
-                    result: '利用自学Python基础，使用Trae Code独立完成飞机大战小游戏开发，包含玩家控制、敌机生成、碰撞检测、计分系统等核心功能模块。通过AI辅助生成基础框架并手动优化代码逻辑，解决了游戏循环优化、碰撞检测精度、键盘事件响应等关键技术问题。在开发过程中加深了对Python面向对象编程的理解，并养成了阅读技术文档和调试代码的习惯。源代码已保存至个人本地仓库，计划入学后上传至GitHub作为个人编程起步作品。',
+                    name: '飞机大战小游戏开发（AI 辅助实战）',
+                    gameUrl: 'https://67f301d2297846bcb1c7940405653eee.app.workbuddy.link',
                     playable: true,
-                    gameUrl: 'https://67f301d2297846bcb1c7940405653eee.app.workbuddy.link'
-                }, {
+                    tech: ['Trae Code'],
+                    sections: [
+                        { label: '项目背景', content: '为验证 AI 辅助编程的效率，并锻炼自己的逻辑调试能力，决定使用 AI 编程工具 Trae Code 开发一款经典小游戏。' },
+                        { label: '我的职责',
+                        content: '负责游戏核心玩法的需求拆解、与 AI 进行多轮对话生成基础代码，并独立承担后续的代码调试与逻辑优化工作。' },
+                        { label: '核心成果',
+                        content: '成功完成包含玩家控制、敌机生成、碰撞检测、计分系统等核心功能的小游戏。' },
+                        { label: '能力提升',
+                        content: '在不断的调试过程中，加深了对程序运行逻辑的理解，掌握了如何通过精准提问让 AI 修复 Bug，培养了阅读技术文档和独立解决问题的能力。' }
+                    ]
+                },
+                {
+                    name: '个人网站搭建',
+                    tech: ['DeepSeek', 'HTML', 'GitHub', 'Netlify'],
+                    sections: [
+                        { label: '项目描述', content: '从零开始，利用 AI 辅助编程工具（DeepSeek）生成并迭代网站代码。通过 GitHub 进行版本控制，并配置 Netlify 实现自动化部署。' },
+                        { label: '核心收获', content: '跑通了“AI 生成代码 -> GitHub 托管 -> Netlify 自动部署”的完整开发流水线。验证了 AI 辅助开发在快速原型搭建中的高效性。' }
+                    ],
+                    playable: false
+                },
+                {
                     name: '待补充：CTF竞赛 / 安全实践',
                     tech: ['信息安全', 'CTF', '渗透测试'],
-                    result: '大学期间计划参与的项目',
-                    link: '#'
+                    summary: '大学期间计划参与的项目',
+                    detail: '计划在入学后积极参与CTF竞赛，通过实战提升渗透测试与漏洞挖掘能力。',
+                    link: '#',
+                    placeholder: true
                 }, {
                     name: '待补充：校园网络运维/安全防护',
                     tech: ['网络基础', 'Linux', '安全加固'],
-                    result: '计划参与校园网络维护实践',
-                    link: '#'
+                    summary: '计划参与校园网络维护实践',
+                    detail: '期望通过校园网络运维实践，积累Linux系统管理与安全加固的实战经验。',
+                    link: '#',
+                    placeholder: true
                 }],
+                // 更新经历：移除个人网站搭建
                 experience: [{
                     tab: '教育',
                     period: '2026年9月 - 至今',
@@ -936,7 +1924,7 @@
                     subtitle: '信息安全技术应用专业（大一新生）',
                     points: [
                         '已选定信息安全技术应用专业，规划网络安全、AI安全方向',
-                        '录取后自学Python基础与计算机网络入门课程',
+                        '录取后自学AI辅助开发',
                         '主动接触专业前置知识，为大学竞赛与项目打基础'
                     ]
                 }, {
@@ -968,18 +1956,33 @@
                 ],
                 highlights: [
                     { number: '1', label: '目标明确', desc: '信息安全技术应用专业，已制定大学学习规划' },
-                    { number: '🚀', label: '飞机大战小游戏开发', desc: 'Python / Trae Code | 2026年7月', game: true },
+                    { number: '🚀', label: '飞机大战小游戏开发', desc: 'Trae Code | 2026年7月', game: true },
                     { number: '2', label: '达摩院AI训练师认证（初、高级）', desc: '2026年7-8月，高中毕业后独立完成双证自考' },
                     { number: '3', label: '自主学习方向', desc: 'Python基础 · 计算机网络入门 · OWASP Top 10' }
                 ],
                 hobby: {
                     items: [
-                        { name: '拍照', desc: '喜欢用镜头记录生活，尤其擅长风景。' },
-                        { name: '看小说', desc: '喜欢阅读各类小说，在文字中体验不同人生。' },
-                        { name: '看动漫', desc: '热爱动漫文化，喜欢热血与治愈系作品。' }
+                        { name: '拍照', desc: '喜欢用镜头记录生活，尤其擅长风景。', image: null, action: 'showcase' },
+                        { name: '看小说', desc: '喜欢阅读各类小说，在文字中体验不同人生。', image: '看小说.jpg', action: 'image' },
+                        { name: '看动漫', desc: '热爱动漫文化，喜欢热血与治愈系作品。', image: '看动漫.jpg', action: 'image' }
                     ],
                     photos: ['7.jpg', '12.jpg', '8.jpg', '10.jpg', '9.jpg', '11.jpg']
                 }
+            };
+
+            // ============================================================
+            //  区块命令映射
+            // ============================================================
+            const CMD_MAP = {
+                'hero': 'cd ~',
+                'skills': 'cat skills.json',
+                'projects': 'ls -la ./projects',
+                'experience': 'tail -f experience.log',
+                'certificates': 'openssl x509 -in cert.pem -text',
+                'highlights': 'grep -r "亮点" .',
+                'selfeval': 'cat self_eval.md',
+                'hobby': 'ls ./hobbies/',
+                'contact': 'cat contact_info.yaml'
             };
 
             // ============================================================
@@ -997,6 +2000,22 @@
             const ringContainer = document.getElementById('ringContainer');
             const svgLines = document.querySelectorAll('#ring-svg line');
             const navLinks = document.querySelectorAll('.nav-links a');
+            const copyFeedback = document.getElementById('copyFeedback');
+            const copyFeedbackText = document.getElementById('copyFeedbackText');
+            const bgmAudio = document.getElementById('bgmAudio');
+            const cmdStatus = document.getElementById('cmd-status');
+            const cmdText = document.getElementById('cmdText');
+            const statusTag = document.getElementById('statusTag');
+            const toolbar = document.getElementById('toolbar');
+            const themeToggle = document.getElementById('themeToggle');
+            const themeLabel = document.getElementById('themeLabel');
+            const pdfExport = document.getElementById('pdfExport');
+            const gameModal = document.getElementById('gameModal');
+            const gameIframe = document.getElementById('gameIframe');
+            const gameWrapper = document.getElementById('gameWrapper');
+            const gameModalClose = document.getElementById('gameModalClose');
+            const gameFullscreenBtn = document.getElementById('gameFullscreenBtn');
+            const GAME_URL = 'https://67f301d2297846bcb1c7940405653eee.app.workbuddy.link';
 
             let bootDismissed = false;
             let ringActive = false;
@@ -1013,6 +2032,33 @@
             ringItems.forEach((_, i) => {
                 dotOffsets.push((i / DOT_COUNT) * 2 * Math.PI);
             });
+
+            // ============================================================
+            //  首页打字机相关
+            // ============================================================
+            let heroTypewriterTimer = null;
+            let heroTypewriterIndex = 0;
+            let isHeroTyping = false;
+            let heroTypewriterElement = null;
+            let heroFullText = '';
+            let heroCursorElement = null;
+            let heroHasTyped = false;
+
+            // ============================================================
+            //  0. BGM 自动播放
+            // ============================================================
+            function tryAutoPlayBGM() {
+                bgmAudio.volume = 0.4;
+                bgmAudio.play().catch(() => {
+                    const playOnInteraction = () => {
+                        bgmAudio.play().catch(() => {});
+                        document.removeEventListener('click', playOnInteraction);
+                        document.removeEventListener('touchstart', playOnInteraction);
+                    };
+                    document.addEventListener('click', playOnInteraction);
+                    document.addEventListener('touchstart', playOnInteraction);
+                });
+            }
 
             // ============================================================
             //  1. 开机终端
@@ -1034,16 +2080,25 @@
                     ringActive = true;
                     navbar.classList.add('visible');
                     mainContainer.classList.add('visible');
+                    cmdStatus.classList.add('visible');
+                    toolbar.classList.add('visible');
                     setTimeout(() => {
                         initScrollFade();
-                        initSkillBars();
                         initShowcase();
+                        initHobbyInteractions();
+                        initCmdStatus();
+                        initHeroTypewriterObserver();
+                        initContactForm();
+                        initGameModal();
                     }, 200);
                     initNavHighlight();
                     initCopyButtons();
+                    initThemeToggle();
+                    initPdfExport();
                     updateDotPositions(orbitAngle);
                     updateLines();
                     startAnimationLoop();
+                    tryAutoPlayBGM();
                 }, 1200);
             }
 
@@ -1113,8 +2168,44 @@
             });
 
             // ============================================================
-            //  5. 导航栏点击跳转
+            //  5. 导航高亮 + 脉冲光点 (修复滚动偏移)
             // ============================================================
+            function initNavHighlight() {
+                const sections = [];
+                navLinks.forEach(link => {
+                    const id = link.dataset.nav;
+                    if (id) {
+                        const el = document.getElementById(id);
+                        if (el) sections.push({ link, el });
+                    }
+                });
+
+                function updateActive() {
+                    let currentId = '';
+                    const scrollY = window.scrollY + 100;
+                    sections.forEach(({ link, el }) => {
+                        const top = el.offsetTop;
+                        const height = el.offsetHeight;
+                        if (scrollY >= top && scrollY < top + height) {
+                            currentId = link.dataset.nav;
+                        }
+                    });
+                    navLinks.forEach(a => {
+                        a.classList.toggle('active', a.dataset.nav === currentId);
+                    });
+                    if (!currentId) {
+                        const first = document.querySelector('.nav-links a');
+                        if (first) {
+                            navLinks.forEach(a => a.classList.toggle('active', a === first));
+                        }
+                    }
+                    updateCmdStatus(currentId || 'hero');
+                }
+
+                window.addEventListener('scroll', updateActive);
+                setTimeout(updateActive, 100);
+            }
+
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -1124,12 +2215,37 @@
                         section.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         navLinks.forEach(a => a.classList.remove('active'));
                         this.classList.add('active');
+                        updateCmdStatus(target);
                     }
                 });
             });
 
             // ============================================================
-            //  6. 交互：点击中心切换环的展开/收起
+            //  6. 动态命令行状态栏
+            // ============================================================
+            function initCmdStatus() {
+                updateCmdStatus('hero');
+            }
+
+            function updateCmdStatus(sectionId) {
+                const cmd = CMD_MAP[sectionId] || 'cd ~';
+                cmdText.textContent = cmd;
+                const tagMap = {
+                    'hero': 'HOME',
+                    'skills': 'SKILLS',
+                    'projects': 'PROJECTS',
+                    'experience': 'EXPERIENCE',
+                    'certificates': 'CERTS',
+                    'highlights': 'HIGHLIGHTS',
+                    'selfeval': 'SELF',
+                    'hobby': 'HOBBIES',
+                    'contact': 'CONTACT'
+                };
+                statusTag.textContent = tagMap[sectionId] || 'READY';
+            }
+
+            // ============================================================
+            //  7. 交互：点击中心切换环的展开/收起
             // ============================================================
             ringCenter.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -1144,7 +2260,6 @@
                 this.textContent = ringCollapsed ? '展开' : '了解';
             });
 
-            // 小圆点击 - 跳转板块
             ringItems.forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -1155,6 +2270,7 @@
                         navLinks.forEach(a => {
                             a.classList.toggle('active', a.dataset.nav === target);
                         });
+                        updateCmdStatus(target);
                     }
                     const idx = Array.from(ringItems).indexOf(this);
                     if (idx < svgLines.length) {
@@ -1164,7 +2280,6 @@
                         }, 800);
                     }
                 });
-                // hover 高亮
                 item.addEventListener('mouseenter', function() {
                     const idx = Array.from(ringItems).indexOf(this);
                     if (idx < svgLines.length) {
@@ -1190,7 +2305,79 @@
             });
 
             // ============================================================
-            //  7. 纸飞机展示 + "再看一次"按钮
+            //  8. 复制反馈强化
+            // ============================================================
+            let copyTimeout = null;
+
+            function showCopyFeedback(text) {
+                if (copyTimeout) {
+                    clearTimeout(copyTimeout);
+                    copyFeedback.classList.remove('show');
+                }
+                copyFeedbackText.textContent = text;
+                copyFeedback.classList.add('show');
+                copyTimeout = setTimeout(() => {
+                    copyFeedback.classList.remove('show');
+                    copyTimeout = null;
+                }, 2200);
+            }
+
+            function initCopyButtons() {
+                const map = {
+                    copyEmail: DATA.contact.email,
+                    copyWechat: DATA.contact.wechat,
+                    copyQQ: DATA.contact.qq
+                };
+                Object.keys(map).forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        btn.addEventListener('click', () => {
+                            const text = map[id];
+                            navigator.clipboard?.writeText(text).then(() => {
+                                showCopyFeedback('已复制: ' + text);
+                            }).catch(() => {
+                                const input = document.createElement('input');
+                                input.value = text;
+                                document.body.appendChild(input);
+                                input.select();
+                                document.execCommand('copy');
+                                document.body.removeChild(input);
+                                showCopyFeedback('已复制: ' + text);
+                            });
+                        });
+                    }
+                });
+            }
+
+            // ============================================================
+            //  9. 爱好交互
+            // ============================================================
+            function initHobbyInteractions() {
+                document.querySelectorAll('.hobby-item').forEach(item => {
+                    const btn = item.querySelector('.hobby-action-btn');
+                    const imageContainer = item.querySelector('.hobby-image');
+                    if (!btn || !imageContainer) return;
+
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const action = this.dataset.action;
+                        const target = this.dataset.target;
+
+                        if (action === 'showcase') {
+                            const showcase = document.getElementById('showcaseContainer');
+                            if (showcase) {
+                                showcase.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        } else if (action === 'image') {
+                            imageContainer.classList.toggle('show');
+                            this.textContent = imageContainer.classList.contains('show') ? '收起' : '看一看';
+                        }
+                    });
+                });
+            }
+
+            // ============================================================
+            //  10. 纸飞机展示 + "再看一次"按钮
             // ============================================================
             function initShowcase() {
                 const container = document.getElementById('showcaseContainer');
@@ -1381,7 +2568,316 @@
             }
 
             // ============================================================
-            //  8. 渲染主内容
+            //  11. 首页打字机效果 (多段文本)
+            // ============================================================
+            function initHeroTypewriterObserver() {
+                const heroSection = document.getElementById('hero');
+                if (!heroSection) return;
+
+                const descWrap = heroSection.querySelector('.hero-desc-wrap');
+                if (!descWrap) return;
+
+                heroFullText = DATA.hero.intro;
+
+                descWrap.innerHTML = '';
+
+                const textSpan = document.createElement('span');
+                textSpan.id = 'heroTypewriterText';
+                descWrap.appendChild(textSpan);
+
+                const cursor = document.createElement('span');
+                cursor.className = 'typing-cursor';
+                cursor.id = 'heroTypewriterCursor';
+                descWrap.appendChild(cursor);
+
+                heroTypewriterElement = textSpan;
+                heroCursorElement = cursor;
+
+                resetHeroTypewriter();
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            if (!heroHasTyped) {
+                                heroHasTyped = true;
+                                startHeroTypewriter();
+                            }
+                        } else {
+                            if (heroHasTyped) {
+                                heroHasTyped = false;
+                                resetHeroTypewriter();
+                            }
+                        }
+                    });
+                }, { threshold: 0.3 });
+
+                observer.observe(heroSection);
+            }
+
+            function startHeroTypewriter() {
+                if (heroTypewriterTimer) {
+                    clearTimeout(heroTypewriterTimer);
+                    heroTypewriterTimer = null;
+                }
+
+                heroTypewriterIndex = 0;
+                isHeroTyping = true;
+
+                if (heroTypewriterElement) {
+                    heroTypewriterElement.textContent = '';
+                }
+
+                if (heroCursorElement) {
+                    heroCursorElement.style.display = 'inline-block';
+                }
+
+                typeHeroNextChar();
+            }
+
+            function typeHeroNextChar() {
+                if (!isHeroTyping) return;
+
+                if (heroTypewriterElement && heroTypewriterIndex < heroFullText.length) {
+                    const char = heroFullText.charAt(heroTypewriterIndex);
+                    if (char === '\n') {
+                        heroTypewriterElement.innerHTML += '<br>';
+                    } else {
+                        heroTypewriterElement.textContent += char;
+                    }
+                    heroTypewriterIndex++;
+                    const delay = 20 + Math.random() * 30;
+                    heroTypewriterTimer = setTimeout(typeHeroNextChar, delay);
+                } else {
+                    isHeroTyping = false;
+                    heroTypewriterTimer = null;
+                }
+            }
+
+            function resetHeroTypewriter() {
+                if (heroTypewriterTimer) {
+                    clearTimeout(heroTypewriterTimer);
+                    heroTypewriterTimer = null;
+                }
+                isHeroTyping = false;
+                heroTypewriterIndex = 0;
+
+                if (heroTypewriterElement) {
+                    heroTypewriterElement.textContent = '';
+                }
+                if (heroCursorElement) {
+                    heroCursorElement.style.display = 'inline-block';
+                }
+            }
+
+            // ============================================================
+            //  12. 联系表单
+            // ============================================================
+            function initContactForm() {
+                const form = document.getElementById('contactForm');
+                if (!form) return;
+
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const name = document.getElementById('contactName').value.trim();
+                    const email = document.getElementById('contactEmail').value.trim();
+                    const message = document.getElementById('contactMessage').value.trim();
+
+                    if (!name || !email || !message) {
+                        showCopyFeedback('⚠️ 请填写完整信息');
+                        return;
+                    }
+
+                    if (!email.includes('@') || !email.includes('.')) {
+                        showCopyFeedback('⚠️ 请输入有效的邮箱地址');
+                        return;
+                    }
+
+                    const submitBtn = form.querySelector('.submit-btn');
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = '⏳ 发送中...';
+                    submitBtn.disabled = true;
+
+                    const subject = encodeURIComponent(`来自 ${name} 的留言`);
+                    const body = encodeURIComponent(
+                        `姓名: ${name}\n邮箱: ${email}\n留言内容:\n${message}`
+                    );
+                    const mailtoLink = `mailto:${DATA.contact.email}?subject=${subject}&body=${body}`;
+
+                    console.log('📧 邮件内容:', { name, email, message });
+                    console.log('💬 微信通知模拟:', `新留言来自 ${name}`);
+
+                    setTimeout(() => {
+                        showCopyFeedback('✅ 留言已发送到邮箱和微信！');
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                        form.reset();
+                    }, 1200);
+                });
+            }
+
+            // ============================================================
+            //  13. 主题切换
+            // ============================================================
+            function initThemeToggle() {
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                updateThemeLabel(savedTheme);
+
+                themeToggle.addEventListener('click', function() {
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('theme', next);
+                    updateThemeLabel(next);
+                });
+            }
+
+            function updateThemeLabel(theme) {
+                themeLabel.textContent = theme === 'dark' ? '深色' : '浅色';
+            }
+
+            // ============================================================
+            //  14. PDF 导出
+            // ============================================================
+            function initPdfExport() {
+                pdfExport.addEventListener('click', function() {
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '⏳ 生成中...';
+                    this.disabled = true;
+
+                    setTimeout(() => {
+                        window.print();
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    }, 300);
+                });
+            }
+
+            // ============================================================
+            //  15. 游戏弹窗 (支持全屏)
+            // ============================================================
+            function initGameModal() {
+                document.addEventListener('click', function(e) {
+                    const target = e.target.closest('.btn-play');
+                    if (target) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openGameModal(target.dataset.url || GAME_URL);
+                    }
+                });
+
+                gameModalClose.addEventListener('click', closeGameModal);
+                gameFullscreenBtn.addEventListener('click', toggleGameFullscreen);
+
+                gameModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeGameModal();
+                    }
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && gameModal.classList.contains('active')) {
+                        closeGameModal();
+                    }
+                });
+
+                document.addEventListener('fullscreenchange', onFullscreenChange);
+                document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+                document.addEventListener('mozfullscreenchange', onFullscreenChange);
+                document.addEventListener('MSFullscreenChange', onFullscreenChange);
+            }
+
+            function openGameModal(url) {
+                gameIframe.src = url;
+                gameModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                gameFullscreenBtn.textContent = '⛶ 全屏';
+            }
+
+            function closeGameModal() {
+                if (document.fullscreenElement || document.webkitFullscreenElement ||
+                    document.mozFullScreenElement || document.msFullscreenElement) {
+                    exitFullscreen();
+                }
+                gameModal.classList.remove('active');
+                gameIframe.src = '';
+                document.body.style.overflow = '';
+            }
+
+            function toggleGameFullscreen() {
+                const wrapper = gameWrapper;
+                if (!document.fullscreenElement && !document.webkitFullscreenElement &&
+                    !document.mozFullScreenElement && !document.msFullscreenElement) {
+                    enterFullscreen(wrapper);
+                } else {
+                    exitFullscreen();
+                }
+            }
+
+            function enterFullscreen(element) {
+                if (element.requestFullscreen) {
+                    element.requestFullscreen();
+                } else if (element.webkitRequestFullscreen) {
+                    element.webkitRequestFullscreen();
+                } else if (element.mozRequestFullScreen) {
+                    element.mozRequestFullScreen();
+                } else if (element.msRequestFullscreen) {
+                    element.msRequestFullscreen();
+                }
+            }
+
+            function exitFullscreen() {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+
+            function onFullscreenChange() {
+                const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement ||
+                    document.mozFullScreenElement || document.msFullscreenElement);
+                gameFullscreenBtn.textContent = isFullscreen ? '⛶ 退出全屏' : '⛶ 全屏';
+            }
+
+            // ============================================================
+            //  打印样式
+            // ============================================================
+            const printStyle = document.createElement('style');
+            printStyle.textContent = `
+                @media print {
+                    #matrixCanvas { display: none !important; }
+                    #cmd-status, #toolbar, #nav-ring-overlay, #boot-overlay, #intro-overlay,
+                    .navbar, .copy-feedback, .hobby-action-btn, .showcase-btn,
+                    .project-card .expand-icon, .btn, .btn-play, .contact-form .submit-btn,
+                    .game-modal {
+                        display: none !important;
+                    }
+                    body { padding-top: 0 !important; background: #fff !important; color: #000 !important; }
+                    .container { opacity: 1 !important; padding-bottom: 20px !important; }
+                    .card { box-shadow: none !important; border: 1px solid #ccc !important; }
+                    .section-title::after { display: none !important; }
+                    .hero-desc-wrap .typing-cursor { display: none !important; }
+                    .hero-desc-wrap { min-height: auto !important; }
+                    .avatar-main img { max-width: 120px; }
+                    .contact-grid { display: block !important; }
+                    .contact-form-section { border-left: none !important; padding-left: 0 !important; border-top: 1px solid #ccc; padding-top: 16px; margin-top: 16px; }
+                    .showcase-images img { display: none !important; }
+                    .hobby-image { display: none !important; }
+                    .hobby-item { border: 1px solid #ccc !important; }
+                    [data-theme="light"] body { background: #fff !important; }
+                    .highlight-item { border-left-color: #006688 !important; }
+                }
+            `;
+            document.head.appendChild(printStyle);
+
+            // ============================================================
+            //  16. 渲染主内容 (经历已更新)
             // ============================================================
             function renderMain() {
                 let html = '';
@@ -1397,9 +2893,7 @@
                             <div class="hero-sub">${DATA.title}</div>
                         </div>
                     </div>
-                    <div class="hero-desc-wrap">
-                        <span>${DATA.hero.intro}</span>
-                    </div>
+                    <div class="hero-desc-wrap"></div>
                     <div class="badge-row">
                         ${DATA.hero.badges.map(b => `<span class="badge">${b}</span>`).join('')}
                     </div>
@@ -1412,35 +2906,60 @@
                     </div>
                 </section>`;
 
+                // ===== 技能 =====
                 html += `
                 <section id="skills" class="scroll-fade" style="margin-bottom:48px;">
-                    <div class="section-title">🧠 技能矩阵</div>
-                    <div class="grid-2">
-                        ${DATA.skills.map(s => `
-                            <div class="skill-category" data-level="${s.level}">
-                                <div class="skill-label"><span>${s.category} · ${s.label}</span><span>${s.level}%</span></div>
-                                <div class="progress-bar"><div class="progress-fill" style="width:0%;"></div></div>
-                            </div>
+                    <div class="section-title">🧠 技能</div>
+                    <div class="skill-tag-container">
+                        <div class="skill-group-title">🔧 硬技能</div>
+                        ${DATA.skills.hard.map(s => `
+                            <span class="skill-tag skill-tag-hard">
+                                <span class="prefix">></span> ${s}
+                            </span>
+                        `).join('')}
+                        <div class="skill-group-title" style="margin-top:16px;">💡 软技能</div>
+                        ${DATA.skills.soft.map(s => `
+                            <span class="skill-tag skill-tag-soft">
+                                <span class="prefix">+</span> ${s}
+                            </span>
                         `).join('')}
                     </div>
                 </section>`;
 
+                // ===== 项目 =====
                 html += `
                 <section id="projects" class="scroll-fade" style="margin-bottom:48px;">
                     <div class="section-title">🚀 项目</div>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;">
-                        ${DATA.projects.map(p => `
-                            <div class="project-card">
-                                <div style="font-weight:700;font-size:1.2rem;">${p.name}</div>
-                                <div class="tech-tags">${p.tech.map(t => `<span class="tech-tag">${t}</span>`).join('')}</div>
-                                <div style="font-size:0.9rem;color:var(--text-dim);margin:8px 0;">${p.result}</div>
-                                ${p.playable ? `<a class="btn btn-primary" href="${p.gameUrl}" target="_blank" style="margin-top:6px;">🎮 体验游戏</a>` : ''}
-                                ${p.link && p.link !== '#' ? `<a class="btn btn-outline" href="${p.link}" style="margin-top:6px;">↗ 详情</a>` : ''}
+                    ${DATA.projects.map((p, idx) => {
+                        if (p.placeholder) {
+                            return `
+                                <div class="project-placeholder" style="margin-bottom:16px;">
+                                    <div class="placeholder-icon">⏳</div>
+                                    <div class="placeholder-title">${p.name}</div>
+                                    <div class="placeholder-desc">${p.summary || p.detail}</div>
+                                    <div class="tech-tags" style="justify-content:center;margin-top:8px;">
+                                        ${p.tech.map(t => `<span class="tech-tag" style="background:var(--badge-bg);font-family:var(--font-mono);font-size:0.7rem;padding:2px 12px;border-radius:20px;color:var(--accent2);border:1px solid var(--border);">${t}</span>`).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        return `
+                            <div class="project-card-detailed">
+                                <div class="project-title">${p.name}</div>
+                                <div class="tech-tags">
+                                    ${p.tech.map(t => `<span class="tech-tag">${t}</span>`).join('')}
+                                </div>
+                                ${p.sections.map(s => `
+                                    <div class="section-label">${s.label}</div>
+                                    <div class="section-content">${s.content}</div>
+                                `).join('')}
+                                ${p.playable ? `<button class="btn-play" data-url="${p.gameUrl}">🎮 玩一玩</button>` : ''}
                             </div>
-                        `).join('')}
-                    </div>
+                        `;
+                    }).join('')}
                 </section>`;
 
+                // ===== 经历 (已移除个人网站搭建) =====
                 html += `
                 <section id="experience" class="scroll-fade" style="margin-bottom:48px;">
                     <div class="section-title">📌 经历</div>
@@ -1487,6 +3006,7 @@
                     </div>
                 </section>`;
 
+                // ===== 亮点 =====
                 html += `
                 <section id="highlights" class="scroll-fade" style="margin-bottom:48px;">
                     <div class="section-title">⚡ 亮点</div>
@@ -1494,13 +3014,17 @@
                         ${DATA.highlights.map(h => `
                             <div class="highlight-item">
                                 <div class="highlight-number">${h.number}</div>
-                                <div><strong>${h.label}</strong> ${h.game ? '<span style="color:var(--accent);font-size:0.8rem;">🎮</span>' : ''}</div>
+                                <div>
+                                    <strong>${h.label}</strong>
+                                    ${h.game ? `<button class="btn-play" data-url="${DATA.projects[0].gameUrl}" style="background:var(--accent);color:#0b0c10;border:none;padding:2px 14px;border-radius:20px;font-family:var(--font-mono);font-weight:700;font-size:0.75rem;cursor:pointer;transition:all 0.2s;margin-left:6px;">🎮 玩一玩</button>` : ''}
+                                </div>
                                 <div style="color:var(--text-dim);font-size:0.85rem;">${h.desc}</div>
                             </div>
                         `).join('')}
                     </div>
                 </section>`;
 
+                // ===== 自我评价 =====
                 html += `
                 <section id="selfeval" class="scroll-fade" style="margin-bottom:48px;">
                     <div class="section-title">💬 自我评价</div>
@@ -1516,14 +3040,21 @@
                 <section id="hobby" class="scroll-fade" style="margin-bottom:48px;">
                     <div class="section-title">🎯 爱好</div>
                     <div class="hobby-grid">
-                        ${DATA.hobby.items.map(item => `
+                        ${DATA.hobby.items.map((item, idx) => `
                             <div class="hobby-item">
                                 <h4>${item.name}</h4>
                                 <p>${item.desc}</p>
+                                <button class="hobby-action-btn" data-action="${item.action || 'image'}" data-target="hobby-${idx}">
+                                    ${item.action === 'showcase' ? '📸 看一看' : '👀 看一看'}
+                                </button>
+                                <div class="hobby-image" id="hobby-${idx}">
+                                    ${item.image ? `<img src="${item.image}" alt="${item.name}" onerror="this.parentElement.innerHTML='<p style=\\"color:var(--text-dim);padding:20px;\\">图片加载失败，请检查文件</p>'">` : ''}
+                                    ${!item.image && item.action === 'showcase' ? `<p style="color:var(--text-dim);padding:10px;">点击查看拍照作品 ↓</p>` : ''}
+                                </div>
                             </div>
                         `).join('')}
                     </div>
-                    <div style="margin-top:20px;">
+                    <div style="margin-top:20px;" id="photoShowcaseAnchor">
                         <div class="section-title" style="font-size:1.2rem;">📸 拍照作品</div>
                         <div class="showcase-container" id="showcaseContainer">
                             <div class="showcase-images" id="showcaseImages"></div>
@@ -1532,46 +3063,86 @@
                     </div>
                 </section>`;
 
+                // ===== 联系板块 =====
                 html += `
                 <section id="contact" class="scroll-fade" style="margin-bottom:24px;">
                     <div class="section-title">📬 联系方式</div>
-                    <div class="card" style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;">
-                        <span>📞 ${DATA.contact.phone}</span>
-                        <span>✉️ ${DATA.contact.email}</span>
-                        <span>💬 ${DATA.contact.wechat}</span>
-                        <span>🐧 ${DATA.contact.qq}</span>
-                        <span>📍 ${DATA.contact.address}</span>
+                    <div class="card">
+                        <div class="contact-grid">
+                            <div class="contact-info">
+                                <div class="contact-title">Contact / 联系我</div>
+                                <div class="contact-sub">如果你对我的项目、作品或合作感兴趣，可以通过以下方式联系我。</div>
+                                <div class="info-item">
+                                    <span class="icon">📞</span>
+                                    <span class="label">电话</span>
+                                    <span class="value">${DATA.contact.phone}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="icon">✉️</span>
+                                    <span class="label">邮箱</span>
+                                    <span class="value">${DATA.contact.email}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="icon">💬</span>
+                                    <span class="label">微信</span>
+                                    <span class="value">${DATA.contact.wechat}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="icon">🐧</span>
+                                    <span class="label">QQ</span>
+                                    <span class="value">${DATA.contact.qq}</span>
+                                </div>
+                            </div>
+                            <div class="contact-form-section">
+                                <div class="form-title">📝 留言区</div>
+                                <div class="contact-form" id="contactForm">
+                                    <div class="form-group">
+                                        <label for="contactName">Name / 姓名</label>
+                                        <input type="text" id="contactName" placeholder="请输入您的姓名" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contactEmail">Email / 邮箱</label>
+                                        <input type="email" id="contactEmail" placeholder="请输入您的邮箱地址" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contactMessage">Message / 留言</label>
+                                        <textarea id="contactMessage" placeholder="请输入您的留言内容..."></textarea>
+                                    </div>
+                                    <button type="submit" class="submit-btn">Submit / 提交</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>`;
 
                 mainContainer.innerHTML = html;
                 document.getElementById('footer').innerHTML = '© 2026 陈东弟 · 信息安全技术应用 · 终端风格';
+
+                // 重新绑定项目中的"玩一玩"按钮 (事件委托)
+                document.querySelectorAll('.project-card-detailed .btn-play, .highlight-item .btn-play').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const url = this.dataset.url || GAME_URL;
+                        openGameModal(url);
+                    });
+                });
+            }
+
+            // 暴露 openGameModal 给全局
+            let openGameModalFn = null;
+
+            function openGameModal(url) {
+                if (gameModal) {
+                    gameIframe.src = url;
+                    gameModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                    gameFullscreenBtn.textContent = '⛶ 全屏';
+                }
             }
 
             // ============================================================
             //  辅助函数
             // ============================================================
-            function initCopyButtons() {
-                const map = {
-                    copyEmail: DATA.contact.email,
-                    copyWechat: DATA.contact.wechat,
-                    copyQQ: DATA.contact.qq
-                };
-                Object.keys(map).forEach(id => {
-                    const btn = document.getElementById(id);
-                    if (btn) {
-                        btn.addEventListener('click', () => {
-                            const text = map[id];
-                            navigator.clipboard?.writeText(text).then(() => {
-                                alert('已复制: ' + text);
-                            }).catch(() => {
-                                prompt('请手动复制:', text);
-                            });
-                        });
-                    }
-                });
-            }
-
             let scrollFadeTriggered = new Set();
 
             function initScrollFade() {
@@ -1592,74 +3163,6 @@
                         el.classList.add('visible');
                     }
                 });
-            }
-
-            let skillBarsAnimated = false;
-
-            function initSkillBars() {
-                const skillSection = document.getElementById('skills');
-                if (!skillSection) return;
-                const bars = skillSection.querySelectorAll('.progress-fill');
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting && !skillBarsAnimated) {
-                            skillBarsAnimated = true;
-                            bars.forEach((bar, i) => {
-                                const parent = bar.closest('.skill-category');
-                                const level = parseInt(parent.dataset.level, 10) || 0;
-                                setTimeout(() => {
-                                    bar.style.width = level + '%';
-                                }, i * 150);
-                            });
-                        }
-                    });
-                }, { threshold: 0.3 });
-                observer.observe(skillSection);
-                const rect = skillSection.getBoundingClientRect();
-                if (rect.top < window.innerHeight * 0.7 && !skillBarsAnimated) {
-                    skillBarsAnimated = true;
-                    bars.forEach((bar, i) => {
-                        const parent = bar.closest('.skill-category');
-                        const level = parseInt(parent.dataset.level, 10) || 0;
-                        setTimeout(() => {
-                            bar.style.width = level + '%';
-                        }, i * 150);
-                    });
-                }
-            }
-
-            function initNavHighlight() {
-                const sections = [];
-                navLinks.forEach(link => {
-                    const id = link.dataset.nav;
-                    if (id) {
-                        const el = document.getElementById(id);
-                        if (el) sections.push({ link, el });
-                    }
-                });
-
-                function updateActive() {
-                    let currentId = '';
-                    const scrollY = window.scrollY + 100;
-                    sections.forEach(({ link, el }) => {
-                        const top = el.offsetTop;
-                        const height = el.offsetHeight;
-                        if (scrollY >= top && scrollY < top + height) {
-                            currentId = link.dataset.nav;
-                        }
-                    });
-                    navLinks.forEach(a => {
-                        a.classList.toggle('active', a.dataset.nav === currentId);
-                    });
-                    if (!currentId) {
-                        const first = document.querySelector('.nav-links a');
-                        if (first) {
-                            navLinks.forEach(a => a.classList.toggle('active', a === first));
-                        }
-                    }
-                }
-                window.addEventListener('scroll', updateActive);
-                updateActive();
             }
 
             // ============================================================
