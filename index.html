@@ -1518,12 +1518,25 @@
             .section-title { font-size: 1.35rem; }
             .section-title .st-icon { width: 38px; height: 38px; font-size: 1.2rem; border-radius: 11px; }
             .showcase-images img.flying { width: 96px; height: 72px; }
-            .nav-links a { padding: 5px 8px; font-size: 0.76rem; }
-            .toolbar-btn { padding: 5px 9px; font-size: 0.68rem; }
+            /* 导航：单行横向滑动，不再堆叠多行 */
+            .nav-inner { flex-wrap: nowrap; gap: 8px; }
+            .nav-links {
+                flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
+                scrollbar-width: none; -ms-overflow-style: none;
+            }
+            .nav-links::-webkit-scrollbar { display: none; }
+            .nav-links a { padding: 5px 8px; font-size: 0.76rem; white-space: nowrap; flex: none; }
+            /* 工具栏：底部悬浮横排，避开顶部导航 */
+            #toolbar {
+                top: auto; bottom: 14px; right: 10px; left: 10px;
+                flex-direction: row; justify-content: center; flex-wrap: wrap; gap: 8px;
+            }
+            .toolbar-btn { padding: 6px 11px; font-size: 0.72rem; box-shadow: 0 6px 18px rgba(6, 40, 27, 0.16); }
             .toolbar-btn .icon { font-size: 0.85rem; }
-            #toolbar { top: 68px; right: 8px; }
             .project-card { padding: 18px; }
             .info-item .value { font-size: 0.76rem; }
+            section { margin-bottom: 56px; }
+            footer { padding-bottom: 74px; }
         }
         @media (max-width: 480px) {
             .hero-title h1 { font-size: 1.8rem; }
@@ -1544,7 +1557,7 @@
 
     <!-- ===== BGM ===== -->
     <audio id="bgmAudio" loop preload="auto">
-        <source src="个人BGM.mp4" type="audio/mp4" />
+        <source src="site-bgm.mp4" type="audio/mp4" />
     </audio>
 
     <!-- ===== 开屏 · 绿能启动 ===== -->
@@ -1881,7 +1894,7 @@
             ],
             certificates: [
                 { name: '达摩院智能客服人工智能训练师（高级）', date: '2026年8月', image: 'zhengshu.jpg' },
-                { name: '达摩院智能客服人工智能训练师（初级）', date: '2026年7月', image: '证书.jpg' }
+                { name: '达摩院智能客服人工智能训练师（初级）', date: '2026年7月', image: 'cert-basic.jpg' }
             ],
             selfEval: [
                 '学习主动性强，高中毕业后没有完全放松，利用暑假系统学习智能客服并考取双证',
@@ -1899,8 +1912,8 @@
             hobby: {
                 items: [
                     { name: '拍照', icon: '📷', desc: '喜欢用镜头记录生活，尤其擅长风景。', image: null, action: 'showcase' },
-                    { name: '看小说', icon: '📖', desc: '喜欢阅读各类小说，在文字中体验不同人生。', image: '看小说.jpg', action: 'image' },
-                    { name: '看动漫', icon: '📺', desc: '热爱动漫文化，喜欢热血与治愈系作品。', image: '看动漫.jpg', action: 'image' }
+                    { name: '看小说', icon: '📖', desc: '喜欢阅读各类小说，在文字中体验不同人生。', image: 'reading.jpg', action: 'image' },
+                    { name: '看动漫', icon: '📺', desc: '热爱动漫文化，喜欢热血与治愈系作品。', image: 'anime.jpg', action: 'image' }
                 ],
                 photos: ['7.jpg', '8.jpg', '9.jpg', '10.jpg', '11.jpg', '12.jpg', '13.jpg']
             },
@@ -1920,7 +1933,7 @@
         function mascotImg() {
             return '<div class="mascot-look">'
                 + '<div class="mascot-actor"><div class="mascot-bounce">'
-                + '<img class="mascot-img" src="个人形象.png" alt="陈东弟Q版形象" loading="lazy" />'
+                + '<img class="mascot-img" src="mascot.png" data-fallback="个人形象.png" alt="陈东弟Q版形象" loading="lazy" onerror="if(!this.dataset.fbTried){this.dataset.fbTried=1;this.src=this.getAttribute(\'data-fallback\');}" />'
                 + '</div></div>'
                 + '</div>';
         }
