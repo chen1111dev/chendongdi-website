@@ -276,6 +276,92 @@
         .toolbar-btn.playing { color: var(--accent); border-color: var(--accent); }
         .toolbar-btn .icon { font-size: 1rem; }
 
+        /* ===== 音乐邀请卡（IP 小人） ===== */
+        #musicInvite {
+            position: fixed; top: 246px; right: 16px; z-index: 98;
+            display: flex; gap: 12px; align-items: flex-start;
+            width: 302px; max-width: calc(100vw - 32px);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 14px 14px 12px;
+            box-shadow: 0 18px 44px rgba(4, 46, 30, 0.22);
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transform: translateY(24px) scale(0.9);
+            transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s;
+        }
+        #musicInvite.show {
+            opacity: 1; visibility: visible; pointer-events: auto;
+            transform: translateY(0) scale(1);
+            animation: inviteBob 3.4s ease-in-out 0.7s infinite;
+        }
+        @keyframes inviteBob {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-5px) scale(1.01); }
+        }
+        .mi-avatar {
+            width: 58px; height: 58px; flex: none;
+            border-radius: 50%; overflow: hidden;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 16px var(--accent-glow);
+            animation: miAvatarBob 2.6s ease-in-out infinite;
+        }
+        @keyframes miAvatarBob {
+            0%, 100% { transform: translateY(0) rotate(-3deg); }
+            50% { transform: translateY(-4px) rotate(3deg); }
+        }
+        .mi-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .mi-body { flex: 1; min-width: 0; }
+        .mi-title { font-weight: 800; font-size: 0.9rem; color: var(--text); margin-bottom: 4px; }
+        .mi-text { font-size: 0.78rem; color: var(--text-dim); line-height: 1.55; margin-bottom: 10px; }
+        .mi-actions { display: flex; gap: 8px; }
+        .mi-actions button {
+            flex: 1; padding: 7px 0; border-radius: 10px;
+            font-family: var(--font-body); font-size: 0.78rem; font-weight: 700;
+            cursor: pointer; transition: all 0.22s;
+            border: 1px solid var(--border); background: var(--bg-soft); color: var(--text-dim);
+        }
+        .mi-actions button:hover { transform: translateY(-2px); }
+        #miAccept {
+            background: linear-gradient(135deg, var(--accent), #0d9668);
+            color: #fff; border: none; box-shadow: 0 6px 16px var(--accent-glow);
+        }
+        #miAccept:hover { box-shadow: 0 8px 22px var(--accent-glow); }
+        #miDecline:hover { border-color: var(--accent); color: var(--accent2); }
+        .mi-close {
+            position: absolute; top: 6px; right: 8px;
+            background: none; border: none; cursor: pointer;
+            font-size: 1rem; color: var(--text-dim); line-height: 1;
+            padding: 4px; transition: color 0.2s;
+        }
+        .mi-close:hover { color: var(--accent2); }
+        .mi-timer {
+            height: 3px; border-radius: 2px; margin-top: 10px;
+            background: var(--border); overflow: hidden; opacity: 0.75;
+        }
+        .mi-timer i {
+            display: block; height: 100%; width: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transform-origin: left center;
+        }
+        #musicInvite.show .mi-timer i { animation: miCountdown 14s linear forwards; }
+        @keyframes miCountdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+        /* 播放中的均衡器小图标 */
+        .bgm-eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 13px; }
+        .bgm-eq i { width: 3px; border-radius: 2px; background: currentColor; animation: eqBar 0.85s ease-in-out infinite; }
+        .bgm-eq i:nth-child(2) { animation-delay: 0.22s; }
+        .bgm-eq i:nth-child(3) { animation-delay: 0.44s; }
+        @keyframes eqBar { 0%, 100% { height: 4px; } 50% { height: 13px; } }
+
+        /* 播放中飘出的音符 */
+        .note-float {
+            position: fixed; z-index: 97; pointer-events: none;
+            font-size: 1.05rem; color: var(--accent2);
+            text-shadow: 0 0 10px var(--accent-glow);
+            will-change: transform, opacity;
+        }
+
         /* ============================================================
            主容器 & 通用
            ============================================================ */
@@ -1531,6 +1617,8 @@
                 top: auto; bottom: 14px; right: 10px; left: 10px;
                 flex-direction: row; justify-content: center; flex-wrap: wrap; gap: 8px;
             }
+            /* 音乐邀请卡：移到底部工具栏上方 */
+            #musicInvite { top: auto; bottom: 96px; right: 12px; left: 12px; width: auto; }
             .toolbar-btn { padding: 6px 11px; font-size: 0.72rem; box-shadow: 0 6px 18px rgba(6, 40, 27, 0.16); }
             .toolbar-btn .icon { font-size: 0.85rem; }
             .project-card { padding: 18px; }
@@ -1544,7 +1632,7 @@
             .nav-links { gap: 0; }
         }
         @media print {
-            #toolbar, .navbar, #ecoCanvas, .mascot-wrap, #boot-overlay, .float-deco, .showcase-btn { display: none !important; }
+            #toolbar, .navbar, #ecoCanvas, .mascot-wrap, #boot-overlay, .float-deco, .showcase-btn, #musicInvite, .note-float { display: none !important; }
             body { background: #fff; }
             .container { opacity: 1; }
             .scroll-fade { opacity: 1; transform: none; }
@@ -1557,6 +1645,7 @@
 
     <!-- ===== BGM ===== -->
     <audio id="bgmAudio" loop preload="auto">
+        <source src="site-bgm.m4a" type="audio/mp4" />
         <source src="site-bgm.mp4" type="audio/mp4" />
     </audio>
 
@@ -1588,7 +1677,7 @@
     <!-- ===== 工具栏 ===== -->
     <div id="toolbar">
         <button class="toolbar-btn" id="bgmToggle" title="播放/暂停背景音乐">
-            <span class="icon">🎵</span> <span id="bgmLabel">音乐</span>
+            <span class="icon" id="bgmIcon">🎵</span> <span id="bgmLabel">音乐</span>
         </button>
         <button class="toolbar-btn" id="gameBtn" title="打开飞机大战">
             <span class="icon">🎮</span> 飞机大战
@@ -1599,6 +1688,24 @@
         <button class="toolbar-btn" id="themeToggle" title="切换日间/夜间模式">
             <span class="icon" id="themeIcon">🌙</span> <span id="themeLabel">夜间</span>
         </button>
+    </div>
+
+    <!-- ===== 音乐邀请卡（IP 小人） ===== -->
+    <div id="musicInvite" role="dialog" aria-label="背景音乐邀请">
+        <div class="mi-avatar">
+            <img src="mascot.png" data-fallback="个人形象.png" alt="陈东弟Q版形象"
+                 onerror="if(!this.dataset.fbTried){this.dataset.fbTried=1;this.src=this.getAttribute('data-fallback');}" />
+        </div>
+        <div class="mi-body">
+            <div class="mi-title">🎵 背景音乐邀请</div>
+            <div class="mi-text">我准备了一段小曲儿，边听边逛更有感觉～不方便的话随时可以关。</div>
+            <div class="mi-actions">
+                <button id="miAccept">🎧 听起来</button>
+                <button id="miDecline">🔇 先不用</button>
+            </div>
+            <div class="mi-timer"><i></i></div>
+        </div>
+        <button class="mi-close" id="miClose" title="关闭邀请卡">×</button>
     </div>
 
     <!-- ===== 导航栏 ===== -->
@@ -2390,12 +2497,8 @@
             document.getElementById('navbar').classList.add('visible');
             document.getElementById('toolbar').classList.add('visible');
             document.getElementById('mainContent').classList.add('visible');
-            var bgm = document.getElementById('bgmAudio');
-            bgm.volume = 0.55;
-            bgm.play().then(function () {
-                document.getElementById('bgmToggle').classList.add('playing');
-                document.getElementById('bgmLabel').textContent = '播放中';
-            }).catch(function () {});
+            /* 不再直接自动播放，改为 IP 小人邀请卡征询访客意见 */
+            setTimeout(showMusicInvite, 900);
             startTyping();
         }
         bootOverlay.addEventListener('click', dismissBoot);
@@ -2682,6 +2785,110 @@
         mountMascot('contactMascot', 'contact', '140px');
 
         /* ============================================================
+           BGM 音乐中心：邀请卡 / 音量淡入 / 飘音符 / 游戏混音
+           ============================================================ */
+        var BGM_VOL = 0.55;
+        var bgmMain = document.getElementById('bgmAudio');
+        var musicInvite = document.getElementById('musicInvite');
+        var inviteTimer = null, noteTimer = null, fadeTimer = null;
+        var bgmDucked = false;
+        var MUSIC_NOTES = ['♪', '♫', '🎶', '🎵', '♩'];
+
+        function setBgmUI(playing) {
+            var btn = document.getElementById('bgmToggle');
+            var icon = document.getElementById('bgmIcon');
+            var label = document.getElementById('bgmLabel');
+            if (playing) {
+                btn.classList.add('playing');
+                label.textContent = '播放中';
+                icon.innerHTML = '<span class="bgm-eq"><i></i><i></i><i></i></span>';
+            } else {
+                btn.classList.remove('playing');
+                label.textContent = '音乐';
+                icon.textContent = '🎵';
+            }
+        }
+        function fadeBgmTo(target, ms) {
+            clearInterval(fadeTimer);
+            var steps = 24, i = 0, from = bgmMain.volume;
+            fadeTimer = setInterval(function () {
+                i++;
+                bgmMain.volume = Math.min(1, Math.max(0, from + (target - from) * (i / steps)));
+                if (i >= steps) { bgmMain.volume = target; clearInterval(fadeTimer); }
+            }, ms / steps);
+        }
+        function spawnMusicNote() {
+            var host = document.getElementById('heroMascot') || document.body;
+            var r = host.getBoundingClientRect();
+            if (r.top > window.innerHeight || r.bottom < 0) return; /* 形象不在视野就不飘 */
+            var n = document.createElement('span');
+            n.className = 'note-float';
+            n.textContent = MUSIC_NOTES[Math.floor(Math.random() * MUSIC_NOTES.length)];
+            n.style.left = (r.left + r.width * (0.3 + Math.random() * 0.5)) + 'px';
+            n.style.top = (r.top + r.height * (0.25 + Math.random() * 0.4)) + 'px';
+            document.body.appendChild(n);
+            var sway = (Math.random() - 0.5) * 80;
+            var anim = n.animate([
+                { transform: 'translate(0, 0) rotate(0deg)', opacity: 0 },
+                { opacity: 0.95, offset: 0.15 },
+                { transform: 'translate(' + sway + 'px, -90px) rotate(' + sway + 'deg)', opacity: 0 }
+            ], { duration: 2200 + Math.random() * 1200, easing: 'ease-out' });
+            anim.onfinish = function () { n.remove(); };
+        }
+        function startNoteFlow() {
+            stopNoteFlow();
+            spawnMusicNote();
+            noteTimer = setInterval(spawnMusicNote, 1900);
+        }
+        function stopNoteFlow() {
+            clearInterval(noteTimer);
+            var notes = document.querySelectorAll('.note-float');
+            for (var k = 0; k < notes.length; k++) notes[k].remove();
+        }
+        function playBgm() {
+            bgmMain.volume = 0;
+            var p = bgmMain.play();
+            if (p && p.then) p.then(function () {
+                fadeBgmTo(bgmDucked ? 0.12 : BGM_VOL, 1800);
+                setBgmUI(true);
+                startNoteFlow();
+            }).catch(function () {
+                setBgmUI(false);
+                showToast('🎵 浏览器拦截了播放，再点一次「音乐」试试');
+            });
+        }
+        function pauseBgm() {
+            bgmMain.pause();
+            setBgmUI(false);
+            stopNoteFlow();
+        }
+        function hideMusicInvite() {
+            clearTimeout(inviteTimer);
+            musicInvite.classList.remove('show');
+        }
+        function showMusicInvite() {
+            if (!bgmMain.paused) return; /* 已在播就不打扰 */
+            clearTimeout(inviteTimer);
+            musicInvite.classList.remove('show');
+            void musicInvite.offsetWidth; /* 重置倒计时动画 */
+            musicInvite.classList.add('show');
+            inviteTimer = setTimeout(function () {
+                hideMusicInvite(); /* 14 秒没理睬：安静收起，不强求 */
+            }, 14000);
+        }
+        document.getElementById('miAccept').addEventListener('click', function () {
+            bgmDucked = false;
+            hideMusicInvite();
+            playBgm();
+            showToast('🎧 音乐响起～想安静时点工具栏「音乐」随时暂停');
+        });
+        document.getElementById('miDecline').addEventListener('click', function () {
+            hideMusicInvite();
+            showToast('👌 收到！想听的时候点工具栏的 🎵 就好');
+        });
+        document.getElementById('miClose').addEventListener('click', hideMusicInvite);
+
+        /* ============================================================
            滚动渐入 + 形象入场 + 导航高亮
            ============================================================ */
         (function scrollFx() {
@@ -2747,19 +2954,9 @@
                 document.getElementById('themeLabel').textContent = dark ? '夜间' : '日间';
             });
 
-            var bgm = document.getElementById('bgmAudio');
             var bgmToggle = document.getElementById('bgmToggle');
             bgmToggle.addEventListener('click', function () {
-                if (bgm.paused) {
-                    bgm.play().then(function () {
-                        bgmToggle.classList.add('playing');
-                        document.getElementById('bgmLabel').textContent = '播放中';
-                    }).catch(function () { showToast('🎵 浏览器拦截了播放，再点一次试试'); });
-                } else {
-                    bgm.pause();
-                    bgmToggle.classList.remove('playing');
-                    document.getElementById('bgmLabel').textContent = '音乐';
-                }
+                if (bgmMain.paused) playBgm(); else pauseBgm();
             });
 
             document.getElementById('pdfExport').addEventListener('click', function () {
@@ -2772,21 +2969,26 @@
             function openGame() {
                 if (!iframe.getAttribute('src')) iframe.src = GAME_URL;
                 modal.classList.add('active');
-                try { iframe.focus(); } catch (err) {}
+                /* 不抢焦点：保持 Esc 可关弹窗；玩家点进游戏时焦点自然交给游戏 */
+                if (!bgmMain.paused && !bgmDucked) { bgmDucked = true; fadeBgmTo(0.12, 600); }
+            }
+            function closeGame() {
+                modal.classList.remove('active');
+                if (bgmDucked) { bgmDucked = false; if (!bgmMain.paused) fadeBgmTo(BGM_VOL, 600); }
             }
             document.getElementById('gameBtn').addEventListener('click', openGame);
             document.addEventListener('click', function (e) {
                 if (e.target.closest('[data-game]')) openGame();
             });
-            document.getElementById('gameModalClose').addEventListener('click', function () { modal.classList.remove('active'); });
-            modal.addEventListener('click', function (e) { if (e.target === modal) modal.classList.remove('active'); });
+            document.getElementById('gameModalClose').addEventListener('click', closeGame);
+            modal.addEventListener('click', function (e) { if (e.target === modal) closeGame(); });
             document.getElementById('gameFullscreenBtn').addEventListener('click', function () {
                 var wrap = document.getElementById('gameWrapper');
                 if (!document.fullscreenElement) { if (wrap.requestFullscreen) wrap.requestFullscreen().catch(function () {}); }
                 else document.exitFullscreen();
             });
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') modal.classList.remove('active');
+                if (e.key === 'Escape') closeGame();
             });
         })();
 
